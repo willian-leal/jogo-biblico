@@ -1,0 +1,10 @@
+{
+  "name": "jogo-biblico",
+  "version": "0.0.1",
+  "scripts": {
+    "start": "echo 'Angular app started'"
+  },
+  "dependencies": {
+    "@angular/core": "~13.0.0"
+  }
+}
