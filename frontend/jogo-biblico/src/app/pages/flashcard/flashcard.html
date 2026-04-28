@@ -1,0 +1,143 @@
+<!-- CONFIGURAÇÃO -->
+@if (fase === 'config') {
+  <div class="container config">
+    <h1>&#127183; Flashcard</h1>
+    <p class="subtitle">Revise no seu próprio ritmo</p>
+
+    <div class="form-group">
+      <label>Dificuldade</label>
+      <select [(ngModel)]="dificuldade">
+        <option value="">Todas</option>
+        <option value="facil">Fácil</option>
+        <option value="medio">Médio</option>
+        <option value="dificil">Difícil</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Testamento</label>
+      <select [(ngModel)]="testamento">
+        <option value="">Todos</option>
+        <option value="AT">Antigo Testamento</option>
+        <option value="NT">Novo Testamento</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Quantidade de cartões</label>
+      <select [(ngModel)]="quantidade">
+        <option [value]="10">10</option>
+        <option [value]="20">20</option>
+        <option [value]="30">30</option>
+        <option [value]="50">50</option>
+      </select>
+    </div>
+
+    @if (erro) {
+      <div class="erro">{{ erro }}</div>
+    }
+
+    <div class="actions">
+      <a routerLink="/" class="btn-secondary">&#8592; Início</a>
+      <button class="btn-primary" (click)="iniciar()" [disabled]="carregando">
+        {{ carregando ? 'Carregando...' : 'Iniciar' }}
+      </button>
+    </div>
+  </div>
+}
+
+<!-- REVISANDO -->
+@if (fase === 'revisando' && perguntaAtual()) {
+  <div class="container revisando">
+    <div class="header">
+      <a routerLink="/" class="link-voltar">&#8592; Início</a>
+      <div class="contadores">
+        <span class="contador-acerto">&#10003; {{ acertos() }}</span>
+        <span class="contador-progresso">{{ progresso().atual }} / {{ progresso().total }}</span>
+        <span class="contador-erro">&#10007; {{ erros() }}</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-badge badge-{{ perguntaAtual()!.dificuldade }}">
+        {{ perguntaAtual()!.dificuldade }}
+      </div>
+
+      <p class="card-pergunta">{{ perguntaAtual()!.pergunta }}</p>
+
+      @if (perguntaAtual()!.referencia) {
+        <p class="card-referencia">{{ perguntaAtual()!.referencia }}</p>
+      }
+
+      @if (!revelada()) {
+        <button
+          class="btn-revelar"
+          (click)="revelar()"
+          [disabled]="carregandoResposta()">
+          {{ carregandoResposta() ? 'Buscando...' : '&#128065; Revelar Resposta' }}
+        </button>
+      }
+
+      @if (revelada()) {
+        <div class="resposta-box">
+          <p class="resposta-label">Resposta:</p>
+          <p class="resposta-texto">{{ respostaCorreta() }}</p>
+        </div>
+
+        <div class="julgamento">
+          <button class="btn-nao-sabia" (click)="responder(false)">
+            &#10007; Não sabia
+          </button>
+          <button class="btn-sabia" (click)="responder(true)">
+            &#10003; Sabia!
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<!-- RESULTADO -->
+@if (fase === 'resultado') {
+  <div class="container resultado">
+    <h1>&#127183; Revisão concluída!</h1>
+
+    <div class="placar-grupo">
+      <div class="placar-item placar-acerto">
+        <span class="placar-num">{{ acertos() }}</span>
+        <span class="placar-label">Sabia</span>
+      </div>
+      <div class="placar-sep">/</div>
+      <div class="placar-item placar-erro">
+        <span class="placar-num">{{ erros() }}</span>
+        <span class="placar-label">Não sabia</span>
+      </div>
+    </div>
+
+    <p class="mensagem">
+      @if (acertos() === registros.length) { Incrível! Você sabia todas! }
+      @else if (acertos() >= registros.length * 0.7) { Muito bem! Continue assim. }
+      @else if (acertos() >= registros.length * 0.5) { Bom progresso! Continue praticando. }
+      @else { Continue estudando as Escrituras! }
+    </p>
+
+    <div class="resumo">
+      @for (r of registros; track $index) {
+        <div class="resumo-item" [class.resumo-ok]="r.sabia" [class.resumo-err]="!r.sabia">
+          <span class="resumo-icone">{{ r.sabia ? '&#10003;' : '&#10007;' }}</span>
+          <div class="resumo-texto">
+            <p class="resumo-pergunta">{{ r.pergunta }}</p>
+            @if (!r.sabia) {
+              <p class="resumo-resposta">Resposta: {{ r.resposta }}</p>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="actions">
+      <a routerLink="/" class="btn-secondary">Início</a>
+      <button class="btn-primary" (click)="reiniciar()">Revisar novamente</button>
+    </div>
+  </div>
+}

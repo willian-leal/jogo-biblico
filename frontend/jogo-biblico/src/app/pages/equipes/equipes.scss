@@ -1,0 +1,378 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  color: white;
+  padding: 1rem;
+}
+
+.container {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+h1 {
+  font-size: 2rem;
+  text-align: center;
+  margin: 0 0 0.25rem;
+}
+
+.subtitle {
+  text-align: center;
+  opacity: 0.75;
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+
+  label {
+    display: block;
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-bottom: 0.4rem;
+  }
+
+  select,
+  input {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 0.5rem;
+    color: white;
+    font-size: 1rem;
+    box-sizing: border-box;
+
+    option {
+      background: #16213e;
+    }
+  }
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.scoreboard {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.score-card {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+
+  &.active {
+    border-color: #4ecdc4;
+    background: rgba(78, 205, 196, 0.16);
+  }
+
+  span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  strong {
+    font-size: 1.4rem;
+    color: #4ecdc4;
+  }
+}
+
+.turn-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+
+  h1 {
+    text-align: left;
+    font-size: 1.6rem;
+  }
+
+  .progress {
+    font-size: 0.9rem;
+    opacity: 0.7;
+  }
+}
+
+.timer-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.timer {
+  font-size: 1.4rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 0.2rem 0.8rem;
+  border-radius: 0.5rem;
+  min-width: 3.5rem;
+  text-align: center;
+
+  &.urgent {
+    color: #ff6b6b;
+    animation: pulse 0.5s infinite alternate;
+  }
+}
+
+.btn-more-time {
+  padding: 0.2rem 0.6rem;
+  background: rgba(78, 205, 196, 0.15);
+  border: 1px solid rgba(78, 205, 196, 0.5);
+  color: #4ecdc4;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+}
+
+.timer-bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+
+  .timer-fill {
+    height: 100%;
+    background: #4ecdc4;
+    border-radius: 3px;
+    transition: width 1s linear;
+
+    &.urgent {
+      background: #ff6b6b;
+    }
+  }
+}
+
+.question-card,
+.cover {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.difficulty {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 1rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge-facil {
+  background: #27ae60;
+}
+
+.badge-medio {
+  background: #f39c12;
+}
+
+.badge-dificil {
+  background: #e74c3c;
+}
+
+.question-text {
+  font-size: 1.15rem;
+  line-height: 1.5;
+  margin: 0 0 0.5rem;
+}
+
+.reference {
+  font-size: 0.8rem;
+  opacity: 0.6;
+  margin: 0;
+  font-style: italic;
+}
+
+.cover {
+  text-align: center;
+
+  p {
+    opacity: 0.75;
+    margin-top: 0;
+  }
+}
+
+.alternatives {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.alternative {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.75rem;
+  color: white;
+  text-align: left;
+  font-size: 1rem;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+
+  &.selected {
+    border-color: #4ecdc4;
+    background: rgba(78, 205, 196, 0.2);
+  }
+
+  &.correct {
+    background: rgba(39, 174, 96, 0.4);
+    border-color: #27ae60;
+  }
+
+  &.wrong {
+    background: rgba(231, 76, 60, 0.4);
+    border-color: #e74c3c;
+  }
+}
+
+.feedback {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+
+  &.feedback-ok {
+    background: rgba(39, 174, 96, 0.3);
+  }
+
+  &.feedback-err {
+    background: rgba(231, 76, 60, 0.3);
+  }
+}
+
+.winner {
+  text-align: center;
+  font-size: 1.25rem;
+  margin: 1.5rem 0;
+
+  strong {
+    color: #4ecdc4;
+  }
+}
+
+.ranking {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.ranking-item {
+  display: grid;
+  grid-template-columns: 3rem 1fr auto;
+  gap: 0.75rem;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
+  padding: 1rem;
+
+  &.first {
+    border: 1px solid #4ecdc4;
+    background: rgba(78, 205, 196, 0.14);
+  }
+
+  span,
+  em {
+    opacity: 0.75;
+    font-style: normal;
+  }
+}
+
+.erro {
+  background: rgba(231, 76, 60, 0.2);
+  border: 1px solid #e74c3c;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 0.75rem 2rem;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: #4ecdc4;
+  color: #1a1a2e;
+  border: none;
+  font-weight: 700;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 720px) {
+  .team-grid,
+  .scoreboard {
+    grid-template-columns: 1fr;
+  }
+
+  .turn-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@keyframes pulse {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.05);
+  }
+}

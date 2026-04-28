@@ -1,0 +1,120 @@
+@if (phase === 'config') {
+  <div class="container config">
+    <h1>Verdadeiro ou Falso</h1>
+    <p class="subtitle">Configure sua partida</p>
+
+    <div class="form-group">
+      <label>Dificuldade</label>
+      <select [(ngModel)]="dificuldade">
+        <option value="">Todas</option>
+        <option value="facil">Fácil</option>
+        <option value="medio">Médio</option>
+        <option value="dificil">Difícil</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Testamento</label>
+      <select [(ngModel)]="testamento">
+        <option value="">Todos</option>
+        <option value="AT">Antigo Testamento</option>
+        <option value="NT">Novo Testamento</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Quantidade de afirmações</label>
+      <select [(ngModel)]="quantidade">
+        <option [ngValue]="5">5</option>
+        <option [ngValue]="10">10</option>
+        <option [ngValue]="15">15</option>
+        <option [ngValue]="20">20</option>
+      </select>
+    </div>
+
+    @if (error) {
+      <div class="erro">{{ error }}</div>
+    }
+
+    <div class="actions">
+      <a routerLink="/" class="btn-secondary">&#8592; Início</a>
+      <button class="btn-primary" (click)="startGame()" [disabled]="loading">
+        {{ loading ? 'Carregando...' : 'Iniciar' }}
+      </button>
+    </div>
+  </div>
+}
+
+@if (phase === 'playing' && currentQuestion()) {
+  <div class="container playing">
+    <div class="header">
+      <span class="progress">{{ currentIndex() + 1 }} / {{ questions.length }}</span>
+      <div class="timer" [class.urgent]="timerSeconds() <= 5">{{ timerSeconds() }}s</div>
+    </div>
+
+    <div class="timer-bar">
+      <div class="timer-fill" [style.width.%]="timerPercent()" [class.urgent]="timerSeconds() <= 5"></div>
+    </div>
+
+    <div class="statement-card">
+      <p>{{ currentQuestion()!.afirmacao }}</p>
+    </div>
+
+    <div class="vof-actions">
+      <button
+        class="truth-button"
+        [class.correct]="feedback?.gabarito === 'verdadeiro'"
+        [class.wrong]="selectedAnswer === 'verdadeiro' && feedback && !feedback.correta"
+        (click)="chooseAnswer('verdadeiro')"
+        [disabled]="waitingFeedback">
+        <span>&#10003;</span>
+        Verdadeiro
+      </button>
+      <button
+        class="false-button"
+        [class.correct]="feedback?.gabarito === 'falso'"
+        [class.wrong]="selectedAnswer === 'falso' && feedback && !feedback.correta"
+        (click)="chooseAnswer('falso')"
+        [disabled]="waitingFeedback">
+        <span>&#10007;</span>
+        Falso
+      </button>
+    </div>
+
+    @if (feedback) {
+      <div class="feedback" [class.feedback-ok]="feedback.correta" [class.feedback-err]="!feedback.correta">
+        {{ feedback.correta ? 'Correto!' : 'Errado — era ' + feedback.gabarito }}
+      </div>
+    }
+  </div>
+}
+
+@if (phase === 'result') {
+  <div class="container result">
+    <h1>Resultado</h1>
+    <div class="score">
+      <span class="hits">{{ score() }}</span>
+      <span class="total">/ {{ questions.length }}</span>
+    </div>
+    <p class="percentage">{{ percentage() }}% de acerto</p>
+
+    <div class="summary">
+      @for (record of records; track $index) {
+        <div class="summary-item" [class.summary-ok]="record.correta" [class.summary-err]="!record.correta">
+          <span class="icon">{{ record.correta ? '&#10003;' : '&#10007;' }}</span>
+          <div>
+            <p>{{ record.afirmacao }}</p>
+            @if (!record.correta) {
+              <small>Gabarito: {{ record.gabarito }}</small>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="actions">
+      <a routerLink="/" class="btn-secondary">Início</a>
+      <button class="btn-primary" (click)="restart()">Jogar novamente</button>
+    </div>
+  </div>
+}

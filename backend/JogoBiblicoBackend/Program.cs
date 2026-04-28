@@ -1,6 +1,122 @@
+using System.Security.Claims;
+using System.Text;
+using JogoBiblicoBackend.Data;
+using JogoBiblicoBackend.Models;
+using JogoBiblicoBackend.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Banco de dados SQLite
+builder.Services.AddDbContext<AppDbContext>(opt =>
+    opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Serviços
+builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddSingleton<PerguntaService>();
+
+// JWT
+var jwtSecret = builder.Configuration["Jwt:Secret"]!;
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(opt =>
+    {
+        opt.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtSecret))
+        };
+    });
+
+builder.Services.AddAuthorization();
+
+// CORS
+builder.Services.AddCors(opt =>
+    opt.AddDefaultPolicy(p =>
+        p.WithOrigins("http://localhost:4200")
+         .AllowAnyHeader()
+         .AllowAnyMethod()));
+
 var app = builder.Build();
 
-app.MapGet("/", () => "Hello World!");
+// Auto-migrar banco de dados na inicialização
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
+
+app.UseCors();
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Auth endpoints
+app.MapPost("/auth/register", async (RegisterRequest req, AuthService auth) =>
+{
+    var result = await auth.RegisterAsync(req);
+    return result is null
+        ? Results.Conflict("Email already registered")
+        : Results.Ok(result);
+});
+
+app.MapPost("/auth/login", async (LoginRequest req, AuthService auth) =>
+{
+    var result = await auth.LoginAsync(req);
+    return result is null
+        ? Results.Unauthorized()
+        : Results.Ok(result);
+});
+
+app.MapGet("/me", (ClaimsPrincipal user) =>
+{
+    var email = user.FindFirst(ClaimTypes.Email)?.Value;
+    var name = user.FindFirst(ClaimTypes.Name)?.Value;
+    return Results.Ok(new { email, name });
+}).RequireAuthorization();
+
+// Perguntas endpoints (públicos no MVP)
+app.MapGet("/perguntas/aleatorio", (
+    int? quantidade,
+    string? dificuldade,
+    string? testamento,
+    PerguntaService perguntaService) =>
+{
+    var perguntas = perguntaService.GetAleatorio(quantidade ?? 10, dificuldade, testamento);
+    return Results.Ok(perguntas);
+});
+
+app.MapPost("/perguntas/verificar", (VerificarRequest req, PerguntaService perguntaService) =>
+{
+    var resultado = perguntaService.VerificarResposta(req.Id, req.Resposta);
+    return resultado is null
+        ? Results.NotFound()
+        : Results.Ok(resultado);
+});
+
+app.MapGet("/perguntas/vof", (
+    int? quantidade,
+    string? dificuldade,
+    string? testamento,
+    PerguntaService perguntaService) =>
+{
+    var perguntas = perguntaService.GetVerdadeiroOuFalso(quantidade ?? 10, dificuldade, testamento);
+    return Results.Ok(perguntas);
+});
+
+app.MapPost("/perguntas/vof/verificar", (VofVerificarRequest req, PerguntaService perguntaService) =>
+{
+    var resultado = perguntaService.VerificarVerdadeiroOuFalso(req.SessaoId, req.Indice, req.Resposta);
+    return resultado is null
+        ? Results.NotFound()
+        : Results.Ok(resultado);
+});
 
 app.Run();

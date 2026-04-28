@@ -1,0 +1,129 @@
+<!-- TELA DE CONFIGURAÇÃO -->
+@if (fase === 'config') {
+  <div class="container config">
+    <h1>&#127919; Quiz Bíblico</h1>
+    <p class="subtitle">Configure sua partida</p>
+
+    <div class="form-group">
+      <label>Dificuldade</label>
+      <select [(ngModel)]="dificuldade">
+        <option value="">Todas</option>
+        <option value="facil">Fácil</option>
+        <option value="medio">Médio</option>
+        <option value="dificil">Difícil</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Testamento</label>
+      <select [(ngModel)]="testamento">
+        <option value="">Todos</option>
+        <option value="AT">Antigo Testamento</option>
+        <option value="NT">Novo Testamento</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Quantidade de perguntas</label>
+      <select [(ngModel)]="quantidade">
+        <option [value]="5">5</option>
+        <option [value]="10">10</option>
+        <option [value]="15">15</option>
+        <option [value]="20">20</option>
+      </select>
+    </div>
+
+    @if (erro) {
+      <div class="erro">{{ erro }}</div>
+    }
+
+    <div class="actions">
+      <a routerLink="/" class="btn-secondary">&#8592; Início</a>
+      <button class="btn-primary" (click)="iniciarQuiz()" [disabled]="carregando">
+        {{ carregando ? 'Carregando...' : 'Iniciar Quiz' }}
+      </button>
+    </div>
+  </div>
+}
+
+<!-- TELA DE JOGO -->
+@if (fase === 'jogando' && perguntaAtual()) {
+  <div class="container jogando">
+    <div class="header">
+      <span class="progresso">{{ indiceAtual() + 1 }} / {{ perguntas.length }}</span>
+      <div class="timer-grupo">
+        <div class="timer" [class.urgente]="timerSegundos() <= 8">
+          {{ timerSegundos() }}s
+        </div>
+        <button class="btn-mais-tempo" (click)="adicionarTempo()" [disabled]="aguardandoFeedback" title="+10 segundos">
+          +10s
+        </button>
+      </div>
+    </div>
+
+    <div class="timer-bar">
+      <div class="timer-fill" [style.width.%]="timerPercent()" [class.urgente]="timerSegundos() <= 8"></div>
+    </div>
+
+    <div class="card-pergunta">
+      <div class="dificuldade badge-{{ perguntaAtual()!.dificuldade }}">{{ perguntaAtual()!.dificuldade }}</div>
+      <p class="pergunta-texto">{{ perguntaAtual()!.pergunta }}</p>
+      @if (perguntaAtual()!.referencia) {
+        <p class="referencia">{{ perguntaAtual()!.referencia }}</p>
+      }
+    </div>
+
+    <div class="alternativas">
+      @for (alt of perguntaAtual()!.alternativas; track alt) {
+        <button
+          class="alternativa {{ getCorAlternativa(alt) }}"
+          (click)="selecionarResposta(alt)"
+          [disabled]="aguardandoFeedback">
+          {{ alt }}
+        </button>
+      }
+    </div>
+
+    @if (feedback) {
+      <div class="feedback" [class.feedback-ok]="feedback.correta" [class.feedback-err]="!feedback.correta">
+        {{ feedback.correta ? '&#10003; Correto!' : '&#10007; Errado — ' + feedback.respostaCorreta }}
+      </div>
+    }
+  </div>
+}
+
+<!-- TELA DE RESULTADO -->
+@if (fase === 'resultado') {
+  <div class="container resultado">
+    <h1>Resultado</h1>
+    <div class="placar">
+      <span class="acertos">{{ pontuacao() }}</span>
+      <span class="total">/ {{ perguntas.length }}</span>
+    </div>
+    <p class="mensagem">
+      @if (pontuacao() === perguntas.length) { Perfeito! Você acertou tudo! }
+      @else if (pontuacao() >= perguntas.length * 0.7) { Muito bem! }
+      @else if (pontuacao() >= perguntas.length * 0.5) { Continue praticando! }
+      @else { Continue estudando as Escrituras! }
+    </p>
+
+    <div class="resumo">
+      @for (r of registros; track $index) {
+        <div class="resumo-item" [class.resumo-ok]="r.correta" [class.resumo-err]="!r.correta">
+          <span class="icone">{{ r.correta ? '&#10003;' : '&#10007;' }}</span>
+          <div class="resumo-texto">
+            <p class="resumo-pergunta">{{ r.pergunta }}</p>
+            @if (!r.correta) {
+              <p class="resumo-resposta">Resposta: {{ r.respostaCorreta }}</p>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="actions">
+      <a routerLink="/" class="btn-secondary">Início</a>
+      <button class="btn-primary" (click)="reiniciar()">Jogar novamente</button>
+    </div>
+  </div>
+}

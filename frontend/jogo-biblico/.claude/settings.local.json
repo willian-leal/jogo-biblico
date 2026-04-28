@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet remove *)",
+      "Bash(dotnet add *)",
+      "Bash(dotnet ef *)",
+      "Bash(ng version *)",
+      "Read(//c/Users/willian.oliveira/development/my-projects/jogo-biblico/frontend/**)",
+      "Bash(ng new *)",
+      "Bash(npm run *)",
+      "Bash(dotnet build *)",
+      "Bash(Start-Process -FilePath \"dotnet\" -ArgumentList \"run\" -WindowStyle Hidden -PassThru)",
+      "Bash(Select-Object -ExpandProperty Id)",
+      "Bash(dotnet run *)",
+      "Bash(curl -s \"http://localhost:5000/perguntas/aleatorio?quantidade=1\")",
+      "Bash(npm install *)"
+    ]
+  }
+}

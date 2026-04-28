@@ -1,0 +1,155 @@
+@if (phase === 'config') {
+  <div class="container config">
+    <h1>Por Equipes</h1>
+    <p class="subtitle">Configure a partida local</p>
+
+    <div class="form-group">
+      <label>Quantidade de equipes</label>
+      <select [(ngModel)]="teamCount" (ngModelChange)="updateTeamCount()">
+        <option [ngValue]="2">2</option>
+        <option [ngValue]="3">3</option>
+        <option [ngValue]="4">4</option>
+      </select>
+    </div>
+
+    <div class="team-grid">
+      @for (team of teams; track $index) {
+        <div class="form-group">
+          <label>Nome da equipe {{ $index + 1 }}</label>
+          <input [(ngModel)]="team.name" />
+        </div>
+      }
+    </div>
+
+    <div class="form-group">
+      <label>Dificuldade</label>
+      <select [(ngModel)]="dificuldade">
+        <option value="">Todas</option>
+        <option value="facil">Fácil</option>
+        <option value="medio">Médio</option>
+        <option value="dificil">Difícil</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Testamento</label>
+      <select [(ngModel)]="testamento">
+        <option value="">Todos</option>
+        <option value="AT">Antigo Testamento</option>
+        <option value="NT">Novo Testamento</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Perguntas por equipe</label>
+      <select [(ngModel)]="questionsPerTeam">
+        <option [ngValue]="5">5</option>
+        <option [ngValue]="10">10</option>
+        <option [ngValue]="15">15</option>
+      </select>
+    </div>
+
+    @if (error) {
+      <div class="erro">{{ error }}</div>
+    }
+
+    <div class="actions">
+      <a routerLink="/" class="btn-secondary">&#8592; Início</a>
+      <button class="btn-primary" (click)="startGame()" [disabled]="loading">
+        {{ loading ? 'Carregando...' : 'Iniciar Partida' }}
+      </button>
+    </div>
+  </div>
+}
+
+@if (phase === 'playing' && currentQuestion()) {
+  <div class="container playing">
+    <div class="scoreboard">
+      @for (team of teams; track $index) {
+        <div class="score-card" [class.active]="$index === currentTeamIndex()">
+          <span>{{ team.name }}</span>
+          <strong>{{ team.score }}</strong>
+        </div>
+      }
+    </div>
+
+    <div class="turn-header">
+      <div>
+        <span class="progress">{{ currentIndex() + 1 }} / {{ questions.length }}</span>
+        <h1>Vez da {{ currentTeam().name }}</h1>
+      </div>
+      <div class="timer-group">
+        <div class="timer" [class.urgent]="timerSeconds() <= 8">{{ timerSeconds() }}s</div>
+        <button class="btn-more-time" (click)="addTime()" [disabled]="waitingFeedback">+10s</button>
+      </div>
+    </div>
+
+    <div class="timer-bar">
+      <div class="timer-fill" [style.width.%]="timerPercent()" [class.urgent]="timerSeconds() <= 8"></div>
+    </div>
+
+    <div class="question-card">
+      <div class="difficulty badge-{{ currentQuestion()!.dificuldade }}">{{ currentQuestion()!.dificuldade }}</div>
+      <p class="question-text">{{ currentQuestion()!.pergunta }}</p>
+      @if (currentQuestion()!.referencia) {
+        <p class="reference">{{ currentQuestion()!.referencia }}</p>
+      }
+    </div>
+
+    @if (!alternativesVisible && !waitingFeedback) {
+      <div class="cover">
+        <p>Somente a equipe da vez deve ver as alternativas.</p>
+        <button class="btn-primary" (click)="showAlternatives()">Mostrar alternativas</button>
+      </div>
+    }
+
+    @if (alternativesVisible) {
+      <div class="alternatives">
+        @for (alternative of currentQuestion()!.alternativas; track alternative) {
+          <button
+            class="alternative {{ getAlternativeClass(alternative) }}"
+            (click)="chooseAnswer(alternative)"
+            [disabled]="waitingFeedback">
+            {{ alternative }}
+          </button>
+        }
+      </div>
+    }
+
+    @if (feedback) {
+      <div class="feedback" [class.feedback-ok]="feedback.correta" [class.feedback-err]="!feedback.correta">
+        {{ feedback.correta ? 'Ponto para ' + currentTeam().name + '!' : 'Errado — ' + feedback.respostaCorreta }}
+      </div>
+    }
+  </div>
+}
+
+@if (phase === 'result') {
+  <div class="container result">
+    <h1>Resultado Final</h1>
+
+    <div class="winner">
+      @if (winners().length === 1) {
+        <p>Vencedora: <strong>{{ winners()[0].name }}</strong></p>
+      } @else {
+        <p>Empate entre {{ winners().length }} equipes</p>
+      }
+    </div>
+
+    <div class="ranking">
+      @for (team of ranking(); track team.name; let position = $index) {
+        <div class="ranking-item" [class.first]="position === 0">
+          <span>{{ position + 1 }}º</span>
+          <strong>{{ team.name }}</strong>
+          <em>{{ team.score }} ponto{{ team.score === 1 ? '' : 's' }}</em>
+        </div>
+      }
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" (click)="playAgain()">Jogar Novamente</button>
+      <button class="btn-secondary" (click)="newGame()">Nova Partida</button>
+      <a routerLink="/" class="btn-secondary">Início</a>
+    </div>
+  </div>
+}
