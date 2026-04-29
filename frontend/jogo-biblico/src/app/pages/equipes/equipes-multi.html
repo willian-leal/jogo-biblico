@@ -1,0 +1,270 @@
+@if (phase() === 'config') {
+  <div class="container config">
+    <h1>Por Equipes em Rede</h1>
+    <p class="subtitle">Cada equipe joga no proprio dispositivo</p>
+
+    <div class="mode-tabs">
+      <button [class.active]="configMode() === 'criar'" (click)="configMode.set('criar')">Criar Sala</button>
+      <button [class.active]="configMode() === 'entrar'" (click)="configMode.set('entrar')">Entrar na Sala</button>
+      <button [class.active]="configMode() === 'assistir'" (click)="configMode.set('assistir')">Assistir</button>
+    </div>
+
+    @if (configMode() === 'criar') {
+      <div class="form-group">
+        <label>Nome da sua equipe</label>
+        <input [(ngModel)]="nomeEquipe" placeholder="Ex: Leao" />
+      </div>
+
+      <div class="form-group">
+        <label>Dificuldade</label>
+        <select [(ngModel)]="dificuldade">
+          <option value="">Todas</option>
+          <option value="facil">Facil</option>
+          <option value="medio">Medio</option>
+          <option value="dificil">Dificil</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Testamento</label>
+        <select [(ngModel)]="testamento">
+          <option value="">Todos</option>
+          <option value="AT">Antigo Testamento</option>
+          <option value="NT">Novo Testamento</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Total de perguntas</label>
+        <select [(ngModel)]="quantidade">
+          <option [ngValue]="10">10</option>
+          <option [ngValue]="20">20</option>
+          <option [ngValue]="30">30</option>
+          <option [ngValue]="60">60</option>
+        </select>
+      </div>
+    } @else {
+      <div class="form-group">
+        <label>Codigo da sala</label>
+        <input [(ngModel)]="codigoEntrada" placeholder="Ex: AB12CD" style="text-transform: uppercase" />
+      </div>
+
+      @if (configMode() === 'entrar') {
+        <div class="form-group">
+          <label>Nome da sua equipe</label>
+          <input [(ngModel)]="nomeEquipe" placeholder="Ex: Profetas" />
+        </div>
+      }
+    }
+
+    @if (erro()) {
+      <div class="erro">{{ erro() }}</div>
+    }
+
+    <div class="actions">
+      <a routerLink="/equipes" class="btn-secondary">Voltar</a>
+      @if (configMode() === 'criar') {
+        <button class="btn-primary" (click)="criarSala()">Criar Sala</button>
+      } @else if (configMode() === 'entrar') {
+        <button class="btn-primary" (click)="entrarNaSala()">Entrar</button>
+      } @else {
+        <button class="btn-primary" (click)="entrarComoEspectador()">Assistir</button>
+      }
+    </div>
+  </div>
+}
+
+@if (phase() === 'conectando') {
+  <div class="container center">
+    <p class="loading-text">Conectando...</p>
+  </div>
+}
+
+@if (phase() === 'lobby') {
+  <div class="container lobby">
+    <div class="codigo-box">
+      <p class="codigo-label">Codigo da sala</p>
+      <h1 class="codigo">{{ codigoSala() }}</h1>
+      <p class="codigo-hint">Compartilhe este codigo com as outras equipes</p>
+    </div>
+
+    <div class="equipes-lobby">
+      <p class="equipes-label">Equipes na sala</p>
+      @for (equipe of estadoSala()?.equipes; track equipe.nome) {
+        <div class="equipe-item" [class.minha]="equipe.nome === minhaEquipe()">
+          {{ equipe.nome }}
+          @if (equipe.nome === minhaEquipe()) { <span class="tag-voce">voce</span> }
+        </div>
+      }
+    </div>
+
+    @if (erro()) {
+      <div class="erro">{{ erro() }}</div>
+    }
+
+    @if (ehEspectador()) {
+      <p class="hint">Modo espectador. Aguardando o anfitriao iniciar o jogo...</p>
+    } @else if (ehAnfitriao()) {
+      <div class="actions">
+        <button
+          class="btn-primary"
+          (click)="iniciarJogo()"
+          [disabled]="(estadoSala()?.equipes?.length ?? 0) < 2">
+          Iniciar Jogo
+        </button>
+        <button class="btn-secondary" (click)="voltarParaConfig()">Cancelar</button>
+      </div>
+      @if ((estadoSala()?.equipes?.length ?? 0) < 2) {
+        <p class="hint">Aguardando mais equipes entrarem...</p>
+      }
+    } @else {
+      <p class="hint">Aguardando o anfitriao iniciar o jogo...</p>
+      <button class="btn-secondary" (click)="voltarParaConfig()">Sair da sala</button>
+    }
+  </div>
+}
+
+@if (phase() === 'transition' && estadoSala()) {
+  <div class="container transition">
+    <div class="scoreboard">
+      @for (equipe of estadoSala()!.equipes; track equipe.nome) {
+        <div class="score-card" [class.active]="equipe.nome === estadoSala()!.nomeEquipeAtual">
+          <span>{{ equipe.nome }}</span>
+          <strong>{{ equipe.pontos }}</strong>
+        </div>
+      }
+    </div>
+
+    <div class="transition-body">
+      <p class="transition-label">Vez de</p>
+      <h1>{{ estadoSala()!.nomeEquipeAtual }}</h1>
+      <p class="transition-hint">
+        Pergunta {{ estadoSala()!.indicePerguntaAtual + 1 }} de {{ estadoSala()!.totalPerguntas }}
+      </p>
+
+      @if (ehEspectador()) {
+        <p class="waiting-text">Acompanhando a partida como espectador</p>
+      } @else if (ehMinhavez()) {
+        <button class="btn-primary btn-ready" (click)="marcarPronto()" [disabled]="aguardando()">
+          {{ aguardando() ? 'Aguardando...' : 'Pronto!' }}
+        </button>
+      } @else {
+        <p class="waiting-text">Aguardando {{ estadoSala()!.nomeEquipeAtual }} ficar pronta...</p>
+        @if (ehAnfitriao()) {
+          <button class="btn-secondary" (click)="forcarAvanco()">Forcar avanco</button>
+        }
+      }
+    </div>
+  </div>
+}
+
+@if (phase() === 'playing' && estadoSala()) {
+  <div class="container playing">
+    <div class="scoreboard">
+      @for (equipe of estadoSala()!.equipes; track equipe.nome) {
+        <div class="score-card" [class.active]="equipe.nome === estadoSala()!.nomeEquipeAtual">
+          <span>{{ equipe.nome }}</span>
+          <strong>{{ equipe.pontos }}</strong>
+        </div>
+      }
+    </div>
+
+    <div class="turn-header">
+      <div>
+        <span class="progress">{{ estadoSala()!.indicePerguntaAtual + 1 }} / {{ estadoSala()!.totalPerguntas }}</span>
+        @if (ehMinhavez()) {
+          <h1>Sua vez!</h1>
+        } @else {
+          <h1>Vez de {{ estadoSala()!.nomeEquipeAtual }}</h1>
+        }
+      </div>
+
+      @if (ehMinhavez() && perguntaDaVez() && !resultadoResposta()) {
+        <div class="timer-group">
+          <div class="timer" [class.urgent]="timerSeconds() <= 8">{{ timerSeconds() }}s</div>
+          <button class="btn-more-time" (click)="adicionarTempo()" [disabled]="aguardando()">+10s (-1pt)</button>
+        </div>
+      }
+    </div>
+
+    @if (perguntaDaVez() && !resultadoResposta()) {
+      @if (ehMinhavez()) {
+        <div class="timer-bar">
+          <div class="timer-fill" [style.width.%]="timerPercent()" [class.urgent]="timerSeconds() <= 8"></div>
+        </div>
+      }
+
+      <div class="question-card">
+        <div class="difficulty badge-{{ perguntaDaVez()!.dificuldade }}">{{ perguntaDaVez()!.dificuldade }}</div>
+        <p class="question-text">{{ perguntaDaVez()!.pergunta }}</p>
+        @if (perguntaDaVez()!.referencia) {
+          <p class="reference">{{ perguntaDaVez()!.referencia }}</p>
+        }
+        @if (ehMinhavez()) {
+          <p class="score-preview">Valendo ate {{ scorePreview() }} ponto{{ scorePreview() === 1 ? '' : 's' }}</p>
+        } @else {
+          <p class="score-preview">{{ estadoSala()!.nomeEquipeAtual }} esta respondendo</p>
+        }
+      </div>
+
+      <div class="alternatives">
+        @for (alternative of perguntaDaVez()!.alternativas; track alternative) {
+          <button
+            class="alternative"
+            [class.readonly]="!ehMinhavez()"
+            (click)="responder(alternative)"
+            [disabled]="aguardando() || !ehMinhavez()">
+            {{ alternative }}
+          </button>
+        }
+      </div>
+    } @else if (!resultadoResposta()) {
+      <div class="waiting-turn">
+        <h2>{{ aguardandoEquipe() || estadoSala()!.nomeEquipeAtual }} esta respondendo...</h2>
+        <p>Aguardando a pergunta aparecer nesta rodada.</p>
+      </div>
+    }
+
+    @if (resultadoResposta()) {
+      <div class="revealed-question">
+        <p class="revealed-label">Pergunta revelada</p>
+        <h2>{{ resultadoResposta()!.perguntaTexto }}</h2>
+        <p>Resposta correta: <strong>{{ resultadoResposta()!.respostaCorreta }}</strong></p>
+      </div>
+    }
+
+    @if (feedback()) {
+      <div class="feedback" [class.feedback-ok]="feedback()!.type === 'ok'" [class.feedback-err]="feedback()!.type === 'err'">
+        {{ feedback()!.message }}
+      </div>
+    }
+  </div>
+}
+
+@if (phase() === 'result') {
+  <div class="container result">
+    <h1>Resultado Final</h1>
+
+    <div class="winner">
+      @if (ranking()[0]) {
+        <p>Vencedor: <strong>{{ ranking()[0].nome }}</strong></p>
+      }
+    </div>
+
+    <div class="ranking">
+      @for (equipe of ranking(); track equipe.nome; let position = $index) {
+        <div class="ranking-item" [class.first]="position === 0">
+          <span>{{ position + 1 }}º</span>
+          <strong>{{ equipe.nome }}</strong>
+          <em>{{ equipe.pontos }} ponto{{ equipe.pontos === 1 ? '' : 's' }}</em>
+        </div>
+      }
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" (click)="jogarNovamente()">Jogar Novamente</button>
+      <button class="btn-secondary" (click)="voltarParaConfig()">Nova Partida</button>
+      <a routerLink="/" class="btn-secondary">Inicio</a>
+    </div>
+  </div>
+}
