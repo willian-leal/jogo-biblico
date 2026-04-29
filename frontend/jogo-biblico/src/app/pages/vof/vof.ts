@@ -11,6 +11,7 @@ type GamePhase = 'rules' | 'config' | 'playing' | 'result';
 type VofAnswer = 'verdadeiro' | 'falso';
 
 interface VofRecord {
+  perguntaId: string;
   afirmacao: string;
   respostaDada: string;
   gabarito: string;
@@ -134,6 +135,7 @@ export class Vof implements OnDestroy {
             gabarito: result.gabarito
           };
           this.records.push({
+            perguntaId: current.id,
             afirmacao: current.afirmacao,
             respostaDada: answer || '(sem resposta)',
             gabarito: result.gabarito,

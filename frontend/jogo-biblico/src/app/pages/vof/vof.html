@@ -118,6 +118,7 @@
               <small>Gabarito: {{ record.gabarito }}</small>
             }
           </div>
+          <app-report-issue modo="verdadeiro-ou-falso" [perguntaId]="record.perguntaId" [contexto]="record.afirmacao" />
         </div>
       }
     </div>
