@@ -32,6 +32,9 @@ export class ForcaHubService implements OnDestroy {
   readonly jogadorSaiu$ = new Subject<JogadorSaiuEvent>();
   readonly entradaEspectador$ = new Subject<{ estadoSala: EstadoSala }>();
   readonly erroSala$ = new Subject<string>();
+  readonly reconectando$ = new Subject<void>();
+  readonly reconectado$ = new Subject<void>();
+  readonly conexaoFechada$ = new Subject<void>();
 
   constructor(private config: ConfigService) {}
 
@@ -56,6 +59,9 @@ export class ForcaHubService implements OnDestroy {
     this.connection.on('JogadorSaiu', (e: JogadorSaiuEvent) => this.jogadorSaiu$.next(e));
     this.connection.on('EntradaEspectador', (e: { estadoSala: EstadoSala }) => this.entradaEspectador$.next(e));
     this.connection.on('ErroSala', (msg: string) => this.erroSala$.next(msg));
+    this.connection.onreconnecting(() => this.reconectando$.next());
+    this.connection.onreconnected(() => this.reconectado$.next());
+    this.connection.onclose(() => this.conexaoFechada$.next());
 
     await this.connection.start();
   }

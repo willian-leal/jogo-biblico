@@ -31,6 +31,9 @@ export class EquipesHubService implements OnDestroy {
   readonly jogadorSaiu$ = new Subject<JogadorSaiuEquipesEvent>();
   readonly entradaEspectador$ = new Subject<{ estadoSala: EstadoSalaEquipes }>();
   readonly erroSala$ = new Subject<string>();
+  readonly reconectando$ = new Subject<void>();
+  readonly reconectado$ = new Subject<void>();
+  readonly conexaoFechada$ = new Subject<void>();
 
   constructor(private config: ConfigService) {}
 
@@ -54,6 +57,9 @@ export class EquipesHubService implements OnDestroy {
     this.connection.on('JogadorSaiu', (e: JogadorSaiuEquipesEvent) => this.jogadorSaiu$.next(e));
     this.connection.on('EntradaEspectador', (e: { estadoSala: EstadoSalaEquipes }) => this.entradaEspectador$.next(e));
     this.connection.on('ErroSala', (msg: string) => this.erroSala$.next(msg));
+    this.connection.onreconnecting(() => this.reconectando$.next());
+    this.connection.onreconnected(() => this.reconectado$.next());
+    this.connection.onclose(() => this.conexaoFechada$.next());
 
     await this.connection.start();
   }
