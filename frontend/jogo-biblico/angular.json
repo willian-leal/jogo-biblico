@@ -54,6 +54,9 @@
             "polyfills": [
               "zone.js"
             ],
+            "allowedCommonJsDependencies": [
+              "qrcode"
+            ],
             "styles": [
               "src/styles.scss"
             ]
