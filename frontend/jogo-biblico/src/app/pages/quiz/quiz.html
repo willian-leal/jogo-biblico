@@ -127,6 +127,7 @@
               <p class="resumo-resposta">Resposta: {{ r.respostaCorreta }}</p>
             }
           </div>
+          <app-report-issue modo="quiz" [perguntaId]="r.perguntaId" [contexto]="r.pergunta" />
         </div>
       }
     </div>

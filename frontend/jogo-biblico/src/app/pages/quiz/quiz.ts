@@ -10,6 +10,7 @@ import { ReportIssue } from '../../shared/report-issue/report-issue';
 type Fase = 'rules' | 'config' | 'jogando' | 'resultado';
 
 interface Registro {
+  perguntaId: string;
   pergunta: string;
   respostaDada: string;
   respostaCorreta: string;
@@ -133,6 +134,7 @@ export class Quiz implements OnDestroy {
       next: resultado => {
         this.feedback = resultado;
         this.registros.push({
+          perguntaId: atual.id,
           pergunta: atual.pergunta,
           respostaDada: resposta || '(sem resposta)',
           respostaCorreta: resultado.respostaCorreta,
