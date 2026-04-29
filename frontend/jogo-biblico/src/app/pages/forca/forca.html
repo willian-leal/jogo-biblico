@@ -1,11 +1,11 @@
 @if (phase === 'rules') {
-  <app-rules-screen title="Por Equipes" [rules]="rules" (ready)="goToConfig()" />
+  <app-rules-screen title="Forca" [rules]="rules" (ready)="goToConfig()" />
 }
 
 @if (phase === 'config') {
   <div class="container config">
-    <h1>Por Equipes</h1>
-    <p class="subtitle">Configure a partida local</p>
+    <h1>Forca</h1>
+    <p class="subtitle">Configure a disputa por personagens</p>
 
     <div class="form-group">
       <label>Quantidade de equipes</label>
@@ -29,9 +29,9 @@
       <label>Dificuldade</label>
       <select [(ngModel)]="dificuldade">
         <option value="">Todas</option>
-        <option value="facil">Fácil</option>
-        <option value="medio">Médio</option>
-        <option value="dificil">Difícil</option>
+        <option value="facil">Facil</option>
+        <option value="medio">Medio</option>
+        <option value="dificil">Dificil</option>
       </select>
     </div>
 
@@ -45,16 +45,16 @@
     </div>
 
     <div class="form-group">
-      <label>Perguntas por equipe</label>
-      <select [(ngModel)]="questionsPerTeam">
+      <label>Rodadas</label>
+      <select [(ngModel)]="questionsPerGame">
+        <option [ngValue]="3">3</option>
         <option [ngValue]="5">5</option>
         <option [ngValue]="10">10</option>
-        <option [ngValue]="15">15</option>
       </select>
     </div>
 
     <div class="scoring-info">
-      <p>Pontuação: Fácil 1pt · Médio 2pts · Difícil 3pts · Velocidade (>20s) +1pt · +10s −1pt</p>
+      <p>Letra correta +1pt. Completar por letras +3pts. Chute correto +5pts. Chute errado passa a vez.</p>
     </div>
 
     @if (error) {
@@ -62,7 +62,7 @@
     }
 
     <div class="actions">
-      <a routerLink="/" class="btn-secondary">&#8592; Início</a>
+      <a routerLink="/" class="btn-secondary">&#8592; Inicio</a>
       <button class="btn-primary" (click)="startGame()" [disabled]="loading">
         {{ loading ? 'Carregando...' : 'Iniciar Partida' }}
       </button>
@@ -85,8 +85,7 @@
       <p class="transition-label">Vez de</p>
       <h1>{{ currentTeam().name }}</h1>
       <p class="transition-hint">
-        Pergunta {{ currentIndex() + 1 }} de {{ questions.length }} &mdash;
-        Passe o dispositivo para a equipe e toque em Pronto
+        Rodada {{ currentIndex() + 1 }} de {{ questions.length }}. A equipe inicial foi sorteada na primeira rodada.
       </p>
       <button class="btn-primary btn-ready" (click)="readyForTurn()">Pronto</button>
     </div>
@@ -109,48 +108,57 @@
         <span class="progress">{{ currentIndex() + 1 }} / {{ questions.length }}</span>
         <h1>Vez da {{ currentTeam().name }}</h1>
       </div>
-      <div class="timer-group">
-        <div class="timer" [class.urgent]="timerSeconds() <= 8">{{ timerSeconds() }}s</div>
-        <button class="btn-more-time" (click)="addTime()" [disabled]="waitingFeedback">+10s (−1pt)</button>
-      </div>
-    </div>
-
-    <div class="timer-bar">
-      <div class="timer-fill" [style.width.%]="timerPercent()" [class.urgent]="timerSeconds() <= 8"></div>
+      <button class="btn-guess" (click)="openGuess()" [disabled]="waitingResponse">Chutar personagem</button>
     </div>
 
     <div class="question-card">
       <div class="report-row">
         <app-report-issue
-          modo="equipes"
+          modo="forca"
           [perguntaId]="currentQuestion()!.id"
-          [contexto]="currentQuestion()!.pergunta" />
+          [contexto]="currentQuestion()!.dica" />
       </div>
       <div class="difficulty badge-{{ currentQuestion()!.dificuldade }}">{{ currentQuestion()!.dificuldade }}</div>
-      <p class="question-text">{{ currentQuestion()!.pergunta }}</p>
-      @if (currentQuestion()!.referencia) {
-        <p class="reference">{{ currentQuestion()!.referencia }}</p>
+      <p class="question-text">{{ currentQuestion()!.dica }}</p>
+    </div>
+
+    <div class="mask" aria-label="Nome do personagem">
+      @for (char of currentQuestion()!.mascara; track $index) {
+        <span class="mask-cell" [class.space]="char === ' '">{{ char === ' ' ? '' : char }}</span>
       }
     </div>
 
-    <div class="alternatives">
-      @for (alternative of currentQuestion()!.alternativas; track alternative) {
+    <div class="alphabet">
+      @for (letter of alphabet; track letter) {
         <button
-          class="alternative {{ getAlternativeClass(alternative) }}"
-          (click)="chooseAnswer(alternative)"
-          [disabled]="waitingFeedback">
-          {{ alternative }}
+          class="letter"
+          [class.used]="isLetterUsed(letter)"
+          [class.wrong]="wrongLetters.includes(letter)"
+          (click)="chooseLetter(letter)"
+          [disabled]="waitingResponse || isLetterUsed(letter)">
+          {{ letter }}
         </button>
       }
     </div>
 
+    @if (wrongLetters.length > 0) {
+      <p class="used-list">Letras erradas: {{ wrongLetters.join(', ') }}</p>
+    }
+
     @if (feedback) {
-      <div class="feedback" [class.feedback-ok]="feedback.correta" [class.feedback-err]="!feedback.correta">
-        @if (feedback.correta) {
-          +{{ pontosGanhos }} ponto{{ pontosGanhos === 1 ? '' : 's' }} para {{ currentTeam().name }}!
-        } @else {
-          Errado &mdash; {{ feedback.respostaCorreta }}
-        }
+      <div class="feedback" [class.feedback-ok]="feedback.type === 'ok'" [class.feedback-err]="feedback.type === 'err'">
+        {{ feedback.message }}
+      </div>
+    }
+
+    @if (guessing) {
+      <div class="guess-panel">
+        <label>Chute da {{ currentTeam().name }}</label>
+        <div class="guess-row">
+          <input [(ngModel)]="guess" placeholder="Nome do personagem" (keyup.enter)="submitGuess()" />
+          <button class="btn-primary" (click)="submitGuess()" [disabled]="!guess.trim() || waitingResponse">Enviar</button>
+          <button class="btn-secondary" (click)="cancelGuess()" [disabled]="waitingResponse">Cancelar</button>
+        </div>
       </div>
     }
   </div>
@@ -171,9 +179,19 @@
     <div class="ranking">
       @for (team of ranking(); track team.name; let position = $index) {
         <div class="ranking-item" [class.first]="position === 0">
-          <span>{{ position + 1 }}º</span>
+          <span>{{ position + 1 }}o</span>
           <strong>{{ team.name }}</strong>
           <em>{{ team.score }} ponto{{ team.score === 1 ? '' : 's' }}</em>
+        </div>
+      }
+    </div>
+
+    <div class="summary">
+      @for (record of records; track $index) {
+        <div class="summary-item">
+          <strong>{{ record.team }}</strong>
+          <span>{{ record.resultado }}: {{ record.respostaCorreta }}</span>
+          <em>+{{ record.pontos }}</em>
         </div>
       }
     </div>
@@ -181,7 +199,7 @@
     <div class="actions">
       <button class="btn-primary" (click)="playAgain()">Jogar Novamente</button>
       <button class="btn-secondary" (click)="newGame()">Nova Partida</button>
-      <a routerLink="/" class="btn-secondary">Início</a>
+      <a routerLink="/" class="btn-secondary">Inicio</a>
     </div>
   </div>
 }

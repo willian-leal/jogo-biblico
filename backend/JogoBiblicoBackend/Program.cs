@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using JogoBiblicoBackend.Data;
 using JogoBiblicoBackend.Models;
 using JogoBiblicoBackend.Services;
@@ -87,9 +88,10 @@ app.MapGet("/perguntas/aleatorio", (
     int? quantidade,
     string? dificuldade,
     string? testamento,
+    bool? personagem,
     PerguntaService perguntaService) =>
 {
-    var perguntas = perguntaService.GetAleatorio(quantidade ?? 10, dificuldade, testamento);
+    var perguntas = perguntaService.GetAleatorio(quantidade ?? 10, dificuldade, testamento, personagem);
     return Results.Ok(perguntas);
 });
 
@@ -105,9 +107,10 @@ app.MapGet("/perguntas/vof", (
     int? quantidade,
     string? dificuldade,
     string? testamento,
+    bool? personagem,
     PerguntaService perguntaService) =>
 {
-    var perguntas = perguntaService.GetVerdadeiroOuFalso(quantidade ?? 10, dificuldade, testamento);
+    var perguntas = perguntaService.GetVerdadeiroOuFalso(quantidade ?? 10, dificuldade, testamento, personagem);
     return Results.Ok(perguntas);
 });
 
@@ -117,6 +120,77 @@ app.MapPost("/perguntas/vof/verificar", (VofVerificarRequest req, PerguntaServic
     return resultado is null
         ? Results.NotFound()
         : Results.Ok(resultado);
+});
+
+app.MapGet("/perguntas/forca", (
+    int? quantidade,
+    string? dificuldade,
+    string? testamento,
+    PerguntaService perguntaService) =>
+{
+    var perguntas = perguntaService.GetForca(quantidade ?? 5, dificuldade, testamento);
+    return Results.Ok(perguntas);
+});
+
+app.MapPost("/perguntas/forca/letra", (ForcaLetraRequest req, PerguntaService perguntaService) =>
+{
+    var resultado = perguntaService.VerificarLetraForca(req.SessaoId, req.Indice, req.Letra);
+    return resultado is null
+        ? Results.NotFound()
+        : Results.Ok(resultado);
+});
+
+app.MapPost("/perguntas/forca/chute", (ForcaChuteRequest req, PerguntaService perguntaService) =>
+{
+    var resultado = perguntaService.ChutarForca(req.SessaoId, req.Indice, req.Resposta);
+    return resultado is null
+        ? Results.NotFound()
+        : Results.Ok(resultado);
+});
+
+app.MapGet("/perguntas/cruzadinha", (
+    int? quantidade,
+    string? dificuldade,
+    string? testamento,
+    PerguntaService perguntaService) =>
+{
+    var cruzadinha = perguntaService.GetCruzadinha(quantidade ?? 5, dificuldade, testamento);
+    return cruzadinha is null
+        ? Results.NotFound()
+        : Results.Ok(cruzadinha);
+});
+
+app.MapPost("/perguntas/cruzadinha/verificar", (CruzadinhaVerificarRequest req, PerguntaService perguntaService) =>
+{
+    var resultado = perguntaService.VerificarCruzadinha(req.SessaoId, req.Respostas);
+    return resultado is null
+        ? Results.NotFound()
+        : Results.Ok(resultado);
+});
+
+app.MapPost("/perguntas/relatar-problema", async (RelatarProblemaRequest req, IWebHostEnvironment env) =>
+{
+    if (string.IsNullOrWhiteSpace(req.Modo) || string.IsNullOrWhiteSpace(req.Motivo))
+        return Results.BadRequest();
+
+    var relato = new
+    {
+        id = Guid.NewGuid().ToString("N"),
+        criadoEm = DateTimeOffset.UtcNow,
+        modo = req.Modo.Trim(),
+        perguntaId = req.PerguntaId?.Trim(),
+        contexto = req.Contexto?.Trim(),
+        motivo = req.Motivo.Trim(),
+        detalhe = req.Detalhe?.Trim()
+    };
+
+    var dataPath = Path.Combine(env.ContentRootPath, "Data");
+    Directory.CreateDirectory(dataPath);
+    var filePath = Path.Combine(dataPath, "relatos_problemas.jsonl");
+    var line = JsonSerializer.Serialize(relato) + Environment.NewLine;
+    await File.AppendAllTextAsync(filePath, line);
+
+    return Results.Ok();
 });
 
 app.Run();

@@ -4,8 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { PerguntaService } from '../../services/pergunta.service';
 import { PerguntaPublica } from '../../models/pergunta.model';
+import { RulesScreen, GameRule } from '../../shared/rules-screen/rules-screen';
+import { ReportIssue } from '../../shared/report-issue/report-issue';
 
-type Fase = 'config' | 'jogando' | 'resultado';
+type Fase = 'rules' | 'config' | 'jogando' | 'resultado';
 
 interface Registro {
   pergunta: string;
@@ -16,19 +18,24 @@ interface Registro {
 
 @Component({
   selector: 'app-quiz',
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, RulesScreen, ReportIssue],
   templateUrl: './quiz.html',
   styleUrl: './quiz.scss'
 })
 export class Quiz implements OnDestroy {
-  fase: Fase = 'config';
+  fase: Fase = 'rules';
 
-  // Configurações
+  readonly rules: GameRule[] = [
+    { icon: '🎯', text: 'Responda perguntas de múltipla escolha com 4 alternativas' },
+    { icon: '⏱', text: '30 segundos por pergunta — o tempo esgotado conta como erro' },
+    { icon: '➕', text: 'Use +10s quando precisar de mais tempo' },
+    { icon: '📊', text: 'Veja seu aproveitamento e o gabarito completo ao final' }
+  ];
+
   dificuldade = '';
   testamento = '';
   quantidade = 10;
 
-  // Estado do jogo
   perguntas: PerguntaPublica[] = [];
   indiceAtual = signal(0);
   timerSegundos = signal(30);
@@ -46,6 +53,10 @@ export class Quiz implements OnDestroy {
   readonly pontuacao = computed(() => this.registros.filter(r => r.correta).length);
 
   constructor(private perguntaService: PerguntaService) {}
+
+  irParaConfig() {
+    this.fase = 'config';
+  }
 
   iniciarQuiz() {
     this.carregando = true;
@@ -77,6 +88,27 @@ export class Quiz implements OnDestroy {
     if (!this.aguardandoFeedback) this.timerSegundos.update(s => s + 10);
   }
 
+  selecionarResposta(alternativa: string) {
+    if (this.aguardandoFeedback) return;
+    this.respostaSelecionada = alternativa;
+    clearInterval(this.timerInterval);
+    this.registrarResposta(alternativa);
+  }
+
+  reiniciar() {
+    clearInterval(this.timerInterval);
+    this.fase = 'config';
+    this.perguntas = [];
+    this.registros = [];
+  }
+
+  getCorAlternativa(alternativa: string): string {
+    if (!this.feedback) return alternativa === this.respostaSelecionada ? 'selecionada' : '';
+    if (alternativa === this.feedback.respostaCorreta) return 'correta';
+    if (alternativa === this.respostaSelecionada && !this.feedback.correta) return 'errada';
+    return '';
+  }
+
   private iniciarTimer() {
     this.timerSegundos.set(30);
     this.respostaSelecionada = '';
@@ -90,13 +122,6 @@ export class Quiz implements OnDestroy {
         this.registrarResposta('');
       }
     }, 1000);
-  }
-
-  selecionarResposta(alternativa: string) {
-    if (this.aguardandoFeedback) return;
-    this.respostaSelecionada = alternativa;
-    clearInterval(this.timerInterval);
-    this.registrarResposta(alternativa);
   }
 
   private registrarResposta(resposta: string) {
@@ -127,20 +152,6 @@ export class Quiz implements OnDestroy {
       clearInterval(this.timerInterval);
       this.fase = 'resultado';
     }
-  }
-
-  reiniciar() {
-    clearInterval(this.timerInterval);
-    this.fase = 'config';
-    this.perguntas = [];
-    this.registros = [];
-  }
-
-  getCorAlternativa(alternativa: string): string {
-    if (!this.feedback) return alternativa === this.respostaSelecionada ? 'selecionada' : '';
-    if (alternativa === this.feedback.respostaCorreta) return 'correta';
-    if (alternativa === this.respostaSelecionada && !this.feedback.correta) return 'errada';
-    return '';
   }
 
   ngOnDestroy() {

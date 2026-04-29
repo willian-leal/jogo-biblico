@@ -4,8 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { PerguntaService } from '../../services/pergunta.service';
 import { PerguntaPublica } from '../../models/pergunta.model';
+import { RulesScreen, GameRule } from '../../shared/rules-screen/rules-screen';
+import { ReportIssue } from '../../shared/report-issue/report-issue';
 
-type Fase = 'config' | 'revisando' | 'resultado';
+type Fase = 'rules' | 'config' | 'revisando' | 'resultado';
 
 interface RegistroFlashcard {
   pergunta: string;
@@ -15,19 +17,24 @@ interface RegistroFlashcard {
 
 @Component({
   selector: 'app-flashcard',
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, RulesScreen, ReportIssue],
   templateUrl: './flashcard.html',
   styleUrl: './flashcard.scss'
 })
 export class Flashcard {
-  fase: Fase = 'config';
+  fase: Fase = 'rules';
 
-  // Configurações
+  readonly rules: GameRule[] = [
+    { icon: '📖', text: 'Leia a pergunta e tente se lembrar da resposta' },
+    { icon: '👁', text: 'Toque em "Revelar" para ver a resposta correta' },
+    { icon: '✅', text: 'Marque "Sabia" ou "Não sabia" honestamente — sem pressão!' },
+    { icon: '🕐', text: 'Sem timer — vá no seu próprio ritmo' }
+  ];
+
   dificuldade = '';
   testamento = '';
   quantidade = 20;
 
-  // Estado
   perguntas: PerguntaPublica[] = [];
   indiceAtual = signal(0);
   revelada = signal(false);
@@ -46,6 +53,10 @@ export class Flashcard {
   }));
 
   constructor(private perguntaService: PerguntaService) {}
+
+  irParaConfig() {
+    this.fase = 'config';
+  }
 
   iniciar() {
     this.carregando = true;
@@ -75,7 +86,6 @@ export class Flashcard {
       });
   }
 
-  // Chama verificarResposta para obter a resposta correta sem expô-la no GET
   revelar() {
     const atual = this.perguntaAtual();
     if (!atual) return;
@@ -105,6 +115,11 @@ export class Flashcard {
     this.proxima();
   }
 
+  reiniciar() {
+    this.fase = 'config';
+    this.perguntas = [];
+  }
+
   private proxima() {
     if (this.indiceAtual() < this.perguntas.length - 1) {
       this.indiceAtual.update(i => i + 1);
@@ -117,10 +132,5 @@ export class Flashcard {
   private resetarCard() {
     this.revelada.set(false);
     this.respostaCorreta.set('');
-  }
-
-  reiniciar() {
-    this.fase = 'config';
-    this.perguntas = [];
   }
 }

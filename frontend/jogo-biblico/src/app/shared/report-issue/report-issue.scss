@@ -1,0 +1,111 @@
+.report-wrapper {
+  position: relative;
+  display: inline-flex;
+  justify-content: flex-end;
+}
+
+.report-button {
+  width: 2.25rem;
+  height: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 1.1rem;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.18);
+  }
+}
+
+.report-panel {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 20;
+  width: min(18rem, 82vw);
+  padding: 0.9rem;
+  background: #16213e;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 0.75rem;
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.28);
+  color: white;
+}
+
+label {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.8rem;
+  opacity: 0.9;
+}
+
+select,
+textarea {
+  width: 100%;
+  padding: 0.55rem;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font: inherit;
+  box-sizing: border-box;
+}
+
+option {
+  background: #16213e;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.report-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.report-send,
+.report-cancel {
+  padding: 0.45rem 0.75rem;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.report-send {
+  border: 0;
+  background: #4ecdc4;
+  color: #1a1a2e;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
+.report-cancel {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.report-ok,
+.report-error {
+  margin: 0 0 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.report-ok {
+  color: #4ecdc4;
+}
+
+.report-error {
+  color: #ff8a8a;
+}

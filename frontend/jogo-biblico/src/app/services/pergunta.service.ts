@@ -3,7 +3,14 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
+  CruzadinhaPublica,
+  CruzadinhaResposta,
+  CruzadinhaVerificarResponse,
+  ForcaChuteResponse,
+  ForcaLetraResponse,
+  ForcaPerguntaPublica,
   PerguntaPublica,
+  RelatarProblemaRequest,
   VerificarResponse,
   VofPerguntaPublica,
   VofVerificarResponse
@@ -15,10 +22,16 @@ export class PerguntaService {
 
   constructor(private http: HttpClient) {}
 
-  getPerguntas(quantidade: number, dificuldade?: string, testamento?: string): Observable<PerguntaPublica[]> {
+  getPerguntas(
+    quantidade: number,
+    dificuldade?: string,
+    testamento?: string,
+    personagem?: boolean
+  ): Observable<PerguntaPublica[]> {
     let params = new HttpParams().set('quantidade', quantidade);
     if (dificuldade) params = params.set('dificuldade', dificuldade);
     if (testamento) params = params.set('testamento', testamento);
+    if (personagem !== undefined) params = params.set('personagem', personagem);
     return this.http
       .get<PerguntaPublica[]>(`${this.api}/perguntas/aleatorio`, { params })
       .pipe(map(perguntas => perguntas.map(pergunta => this.formatPergunta(pergunta))));
@@ -38,11 +51,13 @@ export class PerguntaService {
   getVerdadeiroOuFalso(
     quantidade: number,
     dificuldade?: string,
-    testamento?: string
+    testamento?: string,
+    personagem?: boolean
   ): Observable<VofPerguntaPublica[]> {
     let params = new HttpParams().set('quantidade', quantidade);
     if (dificuldade) params = params.set('dificuldade', dificuldade);
     if (testamento) params = params.set('testamento', testamento);
+    if (personagem !== undefined) params = params.set('personagem', personagem);
     return this.http
       .get<VofPerguntaPublica[]>(`${this.api}/perguntas/vof`, { params })
       .pipe(
@@ -65,6 +80,86 @@ export class PerguntaService {
       indice,
       resposta
     });
+  }
+
+  getForca(
+    quantidade: number,
+    dificuldade?: string,
+    testamento?: string
+  ): Observable<ForcaPerguntaPublica[]> {
+    let params = new HttpParams().set('quantidade', quantidade);
+    if (dificuldade) params = params.set('dificuldade', dificuldade);
+    if (testamento) params = params.set('testamento', testamento);
+    return this.http
+      .get<ForcaPerguntaPublica[]>(`${this.api}/perguntas/forca`, { params })
+      .pipe(
+        map(perguntas =>
+          perguntas.map(pergunta => ({
+            ...pergunta,
+            dica: this.toSentenceCase(pergunta.dica)
+          }))
+        )
+      );
+  }
+
+  verificarLetraForca(
+    sessaoId: string,
+    indice: number,
+    letra: string
+  ): Observable<ForcaLetraResponse> {
+    return this.http.post<ForcaLetraResponse>(`${this.api}/perguntas/forca/letra`, {
+      sessaoId,
+      indice,
+      letra
+    });
+  }
+
+  chutarForca(
+    sessaoId: string,
+    indice: number,
+    resposta: string
+  ): Observable<ForcaChuteResponse> {
+    return this.http.post<ForcaChuteResponse>(`${this.api}/perguntas/forca/chute`, {
+      sessaoId,
+      indice,
+      resposta
+    });
+  }
+
+  getCruzadinha(
+    quantidade?: number,
+    dificuldade?: string,
+    testamento?: string
+  ): Observable<CruzadinhaPublica> {
+    let params = new HttpParams();
+    if (quantidade) params = params.set('quantidade', quantidade);
+    if (dificuldade) params = params.set('dificuldade', dificuldade);
+    if (testamento) params = params.set('testamento', testamento);
+    return this.http
+      .get<CruzadinhaPublica>(`${this.api}/perguntas/cruzadinha`, { params })
+      .pipe(
+        map(cruzadinha => ({
+          ...cruzadinha,
+          palavras: cruzadinha.palavras.map(palavra => ({
+            ...palavra,
+            dica: this.toSentenceCase(palavra.dica)
+          }))
+        }))
+      );
+  }
+
+  verificarCruzadinha(
+    sessaoId: string,
+    respostas: CruzadinhaResposta[]
+  ): Observable<CruzadinhaVerificarResponse> {
+    return this.http.post<CruzadinhaVerificarResponse>(`${this.api}/perguntas/cruzadinha/verificar`, {
+      sessaoId,
+      respostas
+    });
+  }
+
+  relatarProblema(payload: RelatarProblemaRequest): Observable<void> {
+    return this.http.post<void>(`${this.api}/perguntas/relatar-problema`, payload);
   }
 
   private formatPergunta(pergunta: PerguntaPublica): PerguntaPublica {

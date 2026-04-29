@@ -1,0 +1,250 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  color: white;
+  padding: 1rem;
+}
+
+.container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+h1 {
+  font-size: 2rem;
+  text-align: center;
+  margin: 0 0 0.25rem;
+}
+
+.subtitle {
+  text-align: center;
+  opacity: 0.75;
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+
+  label {
+    display: block;
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-bottom: 0.4rem;
+  }
+
+  select {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 0.5rem;
+    color: white;
+    font-size: 1rem;
+    box-sizing: border-box;
+
+    option {
+      background: #16213e;
+    }
+  }
+}
+
+.play-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h1 {
+    text-align: left;
+  }
+}
+
+.progress {
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+.game-layout {
+  display: grid;
+  grid-template-columns: minmax(320px, 560px) 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.grid {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  aspect-ratio: 1;
+  background: rgba(255, 255, 255, 0.14);
+  padding: 3px;
+  border-radius: 0.75rem;
+}
+
+.cell {
+  position: relative;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 0.25rem;
+  min-width: 0;
+
+  &.blocked {
+    background: rgba(0, 0, 0, 0.28);
+  }
+
+  input {
+    width: 100%;
+    height: 100%;
+    padding: 0.25rem;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #1a1a2e;
+    font-size: 1.25rem;
+    font-weight: 800;
+    text-align: center;
+    text-transform: uppercase;
+    box-sizing: border-box;
+  }
+}
+
+.cell-number {
+  position: absolute;
+  top: 0.12rem;
+  left: 0.18rem;
+  color: #1a1a2e;
+  font-size: 0.6rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.clues {
+  display: grid;
+  gap: 1rem;
+
+  h2 {
+    font-size: 1rem;
+    margin: 0 0 0.5rem;
+    opacity: 0.75;
+    text-transform: uppercase;
+  }
+}
+
+.clue {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  gap: 0.75rem;
+  align-items: start;
+  margin-bottom: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 0.75rem;
+  color: white;
+  text-align: left;
+
+  strong {
+    color: #4ecdc4;
+  }
+
+  span {
+    line-height: 1.35;
+  }
+
+  &.correct {
+    border-color: #27ae60;
+    background: rgba(39, 174, 96, 0.24);
+  }
+
+  &.wrong {
+    border-color: #e74c3c;
+    background: rgba(231, 76, 60, 0.22);
+  }
+}
+
+.feedback {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  text-align: center;
+  font-weight: 700;
+  background: rgba(78, 205, 196, 0.18);
+}
+
+.erro {
+  background: rgba(231, 76, 60, 0.2);
+  border: 1px solid #e74c3c;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+
+  &.compact {
+    justify-content: flex-end;
+  }
+
+  &.after-check {
+    margin-top: 1rem;
+  }
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 0.75rem 2rem;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: #4ecdc4;
+  color: #1a1a2e;
+  border: none;
+  font-weight: 700;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 820px) {
+  .play-header,
+  .game-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .play-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .actions.compact {
+    justify-content: stretch;
+
+    button {
+      flex: 1;
+    }
+  }
+
+  .cell input {
+    font-size: 1rem;
+  }
+}

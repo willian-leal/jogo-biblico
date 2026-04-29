@@ -25,6 +25,9 @@ public class Pergunta
     [JsonPropertyName("fonte")]
     public string Fonte { get; set; } = "";
 
+    [JsonPropertyName("personagem")]
+    public bool Personagem { get; set; }
+
     [JsonPropertyName("alternativas")]
     public List<string> Alternativas { get; set; } = new();
 }

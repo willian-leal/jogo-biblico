@@ -21,5 +21,17 @@ export const routes: Routes = [
     path: 'equipes',
     loadComponent: () => import('./pages/equipes/equipes').then(m => m.Equipes)
   },
+  {
+    path: 'quem-sou-eu',
+    loadComponent: () => import('./pages/quem-sou-eu/quem-sou-eu').then(m => m.QuemSouEu)
+  },
+  {
+    path: 'forca',
+    loadComponent: () => import('./pages/forca/forca').then(m => m.Forca)
+  },
+  {
+    path: 'cruzadinha',
+    loadComponent: () => import('./pages/cruzadinha/cruzadinha').then(m => m.Cruzadinha)
+  },
   { path: '**', redirectTo: '' }
 ];

@@ -1,0 +1,133 @@
+@if (phase === 'rules') {
+  <app-rules-screen title="Cruzadinha" [rules]="rules" (ready)="goToConfig()" />
+}
+
+@if (phase === 'config') {
+  <div class="container config">
+    <h1>Cruzadinha</h1>
+    <p class="subtitle">Configure a grade de dicas biblicas</p>
+
+    <div class="form-group">
+      <label>Dificuldade</label>
+      <select [(ngModel)]="dificuldade">
+        <option value="">Todas</option>
+        <option value="facil">Facil</option>
+        <option value="medio">Medio</option>
+        <option value="dificil">Dificil</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Testamento</label>
+      <select [(ngModel)]="testamento">
+        <option value="">Todos</option>
+        <option value="AT">Antigo Testamento</option>
+        <option value="NT">Novo Testamento</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Quantidade de perguntas</label>
+      <select [(ngModel)]="quantidade">
+        <option [ngValue]="4">4</option>
+        <option [ngValue]="5">5</option>
+        <option [ngValue]="6">6</option>
+      </select>
+    </div>
+
+    @if (error) {
+      <div class="erro">{{ error }}</div>
+    }
+
+    <div class="actions">
+      <a routerLink="/" class="btn-secondary">&#8592; Inicio</a>
+      <button class="btn-primary" (click)="startGame()" [disabled]="loading">
+        {{ loading ? 'Carregando...' : 'Iniciar Cruzadinha' }}
+      </button>
+    </div>
+  </div>
+}
+
+@if (phase === 'playing' && puzzle) {
+  <div class="container playing">
+    <div class="play-header">
+      <div>
+        <span class="progress">{{ puzzle.palavras.length }} dicas</span>
+        <h1>Cruzadinha</h1>
+      </div>
+      <div class="actions compact">
+        <app-report-issue
+          modo="cruzadinha"
+          [perguntaId]="puzzle.sessaoId"
+          [contexto]="reportContext()" />
+        <button class="btn-secondary" (click)="clearGrid()">Limpar</button>
+        <button class="btn-primary" (click)="verify()">Verificar</button>
+      </div>
+    </div>
+
+    <div class="game-layout">
+      <div class="grid" [style.gridTemplateColumns]="'repeat(' + puzzle.tamanho + ', minmax(0, 1fr))'">
+        @for (row of rows(); track row) {
+          @for (col of rows(); track col) {
+            <div class="cell" [class.blocked]="!isActiveCell(row, col)">
+              @if (isActiveCell(row, col)) {
+                @if (clueNumberAt(row, col); as number) {
+                  <span class="cell-number">{{ number }}</span>
+                }
+                <input
+                  maxlength="1"
+                  [ngModel]="getCellValue(row, col)"
+                  (ngModelChange)="setCellValue(row, col, $event)"
+                  aria-label="Letra da cruzadinha" />
+              }
+            </div>
+          }
+        }
+      </div>
+
+      <div class="clues">
+        <section>
+          <h2>Horizontal</h2>
+          @for (word of horizontalWords(); track word.id) {
+            <button class="clue {{ getWordStatus(word) }}" type="button">
+              <strong>{{ word.numero }}</strong>
+              <span>{{ word.dica }}</span>
+            </button>
+          }
+        </section>
+
+        <section>
+          <h2>Vertical</h2>
+          @for (word of verticalWords(); track word.id) {
+            <button class="clue {{ getWordStatus(word) }}" type="button">
+              <strong>{{ word.numero }}</strong>
+              <span>{{ word.dica }}</span>
+            </button>
+          }
+        </section>
+      </div>
+    </div>
+
+    @if (feedback) {
+      <div class="feedback">{{ feedback }}</div>
+      <div class="actions after-check">
+        <button class="btn-primary" (click)="verify()">Verificar novamente</button>
+        <button class="btn-secondary" (click)="newGame()">Nova Cruzadinha</button>
+        <a routerLink="/" class="btn-secondary">Inicio</a>
+      </div>
+    }
+  </div>
+}
+
+@if (phase === 'result') {
+  <div class="container result">
+    <h1>Cruzadinha completa!</h1>
+    <p class="subtitle">Todas as respostas foram conferidas.</p>
+
+    <div class="actions">
+      <button class="btn-primary" (click)="playAgain()">Jogar Novamente</button>
+      <button class="btn-secondary" (click)="newGame()">Nova Cruzadinha</button>
+      <a routerLink="/" class="btn-secondary">Inicio</a>
+    </div>
+  </div>
+}

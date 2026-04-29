@@ -1,0 +1,44 @@
+<div class="report-wrapper">
+  <button
+    type="button"
+    class="report-button"
+    (click)="toggle()"
+    title="Relatar problema nesta pergunta"
+    aria-label="Relatar problema nesta pergunta">
+    &#9873;
+  </button>
+
+  @if (open) {
+    <div class="report-panel">
+      <label>
+        Motivo
+        <select [(ngModel)]="motivo">
+          <option>Pergunta com problema</option>
+          <option>Resposta incorreta</option>
+          <option>Alternativas confusas</option>
+          <option>Erro de texto</option>
+          <option>Outro</option>
+        </select>
+      </label>
+
+      <label>
+        Detalhe
+        <textarea [(ngModel)]="detalhe" rows="3" placeholder="Opcional"></textarea>
+      </label>
+
+      @if (sent) {
+        <p class="report-ok">Relato enviado. Obrigado!</p>
+      }
+      @if (error) {
+        <p class="report-error">{{ error }}</p>
+      }
+
+      <div class="report-actions">
+        <button type="button" class="report-send" (click)="submit()" [disabled]="sending">
+          {{ sending ? 'Enviando...' : 'Enviar' }}
+        </button>
+        <button type="button" class="report-cancel" (click)="toggle()">Fechar</button>
+      </div>
+    </div>
+  }
+</div>

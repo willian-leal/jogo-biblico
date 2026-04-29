@@ -1,0 +1,15 @@
+<div class="rules-wrapper">
+  <h1>{{ title }}</h1>
+  <p class="subtitle">Como funciona</p>
+
+  <ul class="rules-list">
+    @for (rule of rules; track rule.text) {
+      <li>
+        <span class="rule-icon">{{ rule.icon }}</span>
+        <span class="rule-text">{{ rule.text }}</span>
+      </li>
+    }
+  </ul>
+
+  <button class="btn-ready" (click)="ready.emit()">Entendido, vamos jogar!</button>
+</div>

@@ -4,8 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { PerguntaService } from '../../services/pergunta.service';
 import { VofPerguntaPublica } from '../../models/pergunta.model';
+import { RulesScreen, GameRule } from '../../shared/rules-screen/rules-screen';
+import { ReportIssue } from '../../shared/report-issue/report-issue';
 
-type GamePhase = 'config' | 'playing' | 'result';
+type GamePhase = 'rules' | 'config' | 'playing' | 'result';
 type VofAnswer = 'verdadeiro' | 'falso';
 
 interface VofRecord {
@@ -17,12 +19,19 @@ interface VofRecord {
 
 @Component({
   selector: 'app-vof',
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, RulesScreen, ReportIssue],
   templateUrl: './vof.html',
   styleUrl: './vof.scss'
 })
 export class Vof implements OnDestroy {
-  phase: GamePhase = 'config';
+  phase: GamePhase = 'rules';
+
+  readonly rules: GameRule[] = [
+    { icon: '📋', text: 'Uma afirmação bíblica é exibida na tela' },
+    { icon: '🤔', text: 'Decida se a afirmação é Verdadeira ou Falsa' },
+    { icon: '⏱', text: '15 segundos por afirmação — o tempo esgotado conta como erro' },
+    { icon: '📊', text: 'Veja sua porcentagem de acertos e o gabarito ao final' }
+  ];
 
   dificuldade = '';
   testamento = '';
@@ -48,6 +57,10 @@ export class Vof implements OnDestroy {
   );
 
   constructor(private perguntaService: PerguntaService) {}
+
+  goToConfig() {
+    this.phase = 'config';
+  }
 
   startGame() {
     this.loading = true;

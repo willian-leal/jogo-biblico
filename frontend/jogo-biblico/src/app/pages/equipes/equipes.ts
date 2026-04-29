@@ -4,8 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { PerguntaService } from '../../services/pergunta.service';
 import { PerguntaPublica } from '../../models/pergunta.model';
+import { RulesScreen, GameRule } from '../../shared/rules-screen/rules-screen';
+import { ReportIssue } from '../../shared/report-issue/report-issue';
 
-type GamePhase = 'config' | 'playing' | 'result';
+type GamePhase = 'rules' | 'config' | 'transition' | 'playing' | 'result';
 
 interface Team {
   name: string;
@@ -18,16 +20,25 @@ interface TeamRecord {
   respostaDada: string;
   respostaCorreta: string;
   correta: boolean;
+  pontos: number;
 }
 
 @Component({
   selector: 'app-equipes',
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, RulesScreen, ReportIssue],
   templateUrl: './equipes.html',
   styleUrl: './equipes.scss'
 })
 export class Equipes implements OnDestroy {
-  phase: GamePhase = 'config';
+  phase: GamePhase = 'rules';
+
+  readonly rules: GameRule[] = [
+    { icon: '👥', text: 'As equipes se alternam, uma pergunta por vez' },
+    { icon: '📱', text: 'Passe o dispositivo para cada equipe antes da pergunta aparecer' },
+    { icon: '🏆', text: 'Pontuação base: Fácil 1pt · Médio 2pts · Difícil 3pts' },
+    { icon: '⚡', text: 'Bônus de velocidade: +1pt se restar mais de 20 segundos' },
+    { icon: '⏱', text: 'Cada uso de +10s custa −1pt na pergunta (mínimo 0)' }
+  ];
 
   teamCount = 2;
   teams: Team[] = [
@@ -43,8 +54,9 @@ export class Equipes implements OnDestroy {
   timerSeconds = signal(30);
   selectedAnswer = '';
   waitingFeedback = false;
-  alternativesVisible = false;
   feedback: { correta: boolean; respostaCorreta: string } | null = null;
+  addTimeUses = 0;
+  pontosGanhos = 0;
   records: TeamRecord[] = [];
   loading = false;
   error = '';
@@ -55,7 +67,7 @@ export class Equipes implements OnDestroy {
   readonly currentTeamIndex = computed(() => this.currentIndex() % this.teams.length);
   readonly currentTeam = computed(() => this.teams[this.currentTeamIndex()] ?? this.teams[0]);
   readonly totalQuestions = computed(() => this.teamCount * this.questionsPerTeam);
-  readonly timerPercent = computed(() => (this.timerSeconds() / 30) * 100);
+  readonly timerPercent = computed(() => Math.min(100, (this.timerSeconds() / 30) * 100));
   readonly ranking = computed(() =>
     [...this.teams].sort((a, b) => b.score - a.score || a.name.localeCompare(b.name))
   );
@@ -65,6 +77,10 @@ export class Equipes implements OnDestroy {
   });
 
   constructor(private perguntaService: PerguntaService) {}
+
+  goToConfig() {
+    this.phase = 'config';
+  }
 
   updateTeamCount() {
     const nextTeams: Team[] = [];
@@ -99,9 +115,8 @@ export class Equipes implements OnDestroy {
           }));
           this.currentIndex.set(0);
           this.records = [];
-          this.phase = 'playing';
           this.loading = false;
-          this.startTurn();
+          this.prepareNextTurn();
         },
         error: () => {
           this.error = 'Erro ao carregar perguntas. Verifique se o backend está rodando em http://localhost:5000.';
@@ -110,17 +125,27 @@ export class Equipes implements OnDestroy {
       });
   }
 
-  showAlternatives() {
-    if (this.waitingFeedback) return;
-    this.alternativesVisible = true;
+  readyForTurn() {
+    this.phase = 'playing';
+    clearInterval(this.timerInterval);
+    this.timerInterval = setInterval(() => {
+      this.timerSeconds.update(seconds => seconds - 1);
+      if (this.timerSeconds() <= 0) {
+        clearInterval(this.timerInterval);
+        this.submitAnswer('');
+      }
+    }, 1000);
   }
 
   addTime() {
-    if (!this.waitingFeedback) this.timerSeconds.update(seconds => seconds + 10);
+    if (!this.waitingFeedback) {
+      this.timerSeconds.update(seconds => seconds + 10);
+      this.addTimeUses++;
+    }
   }
 
   chooseAnswer(answer: string) {
-    if (this.waitingFeedback || !this.alternativesVisible) return;
+    if (this.waitingFeedback) return;
     this.selectedAnswer = answer;
     clearInterval(this.timerInterval);
     this.submitAnswer(answer);
@@ -144,40 +169,39 @@ export class Equipes implements OnDestroy {
     return '';
   }
 
-  private startTurn() {
+  private prepareNextTurn() {
+    this.phase = 'transition';
     this.timerSeconds.set(30);
     this.selectedAnswer = '';
     this.waitingFeedback = false;
-    this.alternativesVisible = false;
     this.feedback = null;
+    this.addTimeUses = 0;
+    this.pontosGanhos = 0;
     clearInterval(this.timerInterval);
-    this.timerInterval = setInterval(() => {
-      this.timerSeconds.update(seconds => seconds - 1);
-      if (this.timerSeconds() <= 0) {
-        clearInterval(this.timerInterval);
-        this.submitAnswer('');
-      }
-    }, 1000);
   }
 
   private submitAnswer(answer: string) {
     const current = this.currentQuestion();
     if (!current || this.waitingFeedback) return;
     this.waitingFeedback = true;
-    this.alternativesVisible = true;
 
     this.perguntaService.verificarResposta(current.id, answer).subscribe({
       next: result => {
         this.feedback = result;
         if (result.correta) {
-          this.currentTeam().score += 1;
+          const score = this.calcScore(current.dificuldade, this.timerSeconds(), this.addTimeUses);
+          this.pontosGanhos = score;
+          this.currentTeam().score += score;
+        } else {
+          this.pontosGanhos = 0;
         }
         this.records.push({
           team: this.currentTeam().name,
           pergunta: current.pergunta,
           respostaDada: answer || '(sem resposta)',
           respostaCorreta: result.respostaCorreta,
-          correta: result.correta
+          correta: result.correta,
+          pontos: this.pontosGanhos
         });
         setTimeout(() => this.nextTurn(), 2000);
       },
@@ -188,12 +212,18 @@ export class Equipes implements OnDestroy {
   private nextTurn() {
     if (this.currentIndex() < this.questions.length - 1) {
       this.currentIndex.update(index => index + 1);
-      this.startTurn();
+      this.prepareNextTurn();
       return;
     }
-
     clearInterval(this.timerInterval);
     this.phase = 'result';
+  }
+
+  // base por dificuldade + bônus de velocidade (>20s) − penalidade de +10s
+  private calcScore(dificuldade: string, timeRemaining: number, addTimeUses: number): number {
+    const base = dificuldade === 'facil' ? 1 : dificuldade === 'medio' ? 2 : 3;
+    const speedBonus = timeRemaining > 20 ? 1 : 0;
+    return Math.max(0, base + speedBonus - addTimeUses);
   }
 
   private shuffle<T>(items: T[]): T[] {

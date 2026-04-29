@@ -1,0 +1,219 @@
+@if (phase === 'rules') {
+  <app-rules-screen title="Quem Sou Eu?" [rules]="rules" (ready)="goToConfig()" />
+}
+
+@if (phase === 'config') {
+  <div class="container config">
+    <h1>&#127917; Quem Sou Eu?</h1>
+    <p class="subtitle">Configure a partida de mímica</p>
+
+    <div class="form-group">
+      <label>Quantidade de equipes</label>
+      <select [(ngModel)]="teamCount" (ngModelChange)="updateTeamCount()">
+        <option [ngValue]="2">2</option>
+        <option [ngValue]="3">3</option>
+        <option [ngValue]="4">4</option>
+      </select>
+    </div>
+
+    <div class="team-grid">
+      @for (team of teams; track $index) {
+        <div class="form-group">
+          <label>Nome da equipe {{ $index + 1 }}</label>
+          <input [(ngModel)]="team.name" />
+        </div>
+      }
+    </div>
+
+    <div class="form-group">
+      <label>Dificuldade</label>
+      <select [(ngModel)]="dificuldade">
+        <option value="">Todas</option>
+        <option value="facil">Fácil (90s por carta)</option>
+        <option value="medio">Médio (60s por carta)</option>
+        <option value="dificil">Difícil (45s por carta)</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Cartas por equipe</label>
+      <select [(ngModel)]="cardsPerTeam">
+        <option [ngValue]="3">3</option>
+        <option [ngValue]="5">5</option>
+        <option [ngValue]="7">7</option>
+        <option [ngValue]="10">10</option>
+      </select>
+    </div>
+
+    <div class="scoring-info">
+      <p>Fácil 1pt · Médio 2pts · Difícil 3pts · Velocidade (>50% do tempo) +1pt</p>
+    </div>
+
+    @if (error) {
+      <div class="erro">{{ error }}</div>
+    }
+
+    <div class="actions">
+      <a routerLink="/" class="btn-secondary">&#8592; Início</a>
+      <button class="btn-primary" (click)="startGame()">Iniciar Partida</button>
+    </div>
+  </div>
+}
+
+@if (phase === 'transition') {
+  <div class="container transition">
+    <div class="scoreboard">
+      @for (team of teams; track $index) {
+        <div class="score-card" [class.active]="$index === currentTeamIndex()">
+          <span>{{ team.name }}</span>
+          <strong>{{ team.score }}</strong>
+        </div>
+      }
+    </div>
+
+    <div class="transition-body">
+      <p class="transition-label">Vez de</p>
+      <h1>{{ currentTeam().name }}</h1>
+      <p class="transition-hint">
+        Carta {{ currentIndex() + 1 }} de {{ cards.length }}<br>
+        O ator deve segurar o dispositivo.<br>
+        A equipe deve olhar para outro lado antes de tocar em Pronto.
+      </p>
+      <button class="btn-primary btn-ready" (click)="readyForTurn()">
+        Estou pronto &mdash; mostrar personagem
+      </button>
+    </div>
+  </div>
+}
+
+@if (phase === 'acting' && currentCard()) {
+  <div class="container acting">
+
+    @if (!actingStarted && !actingResult) {
+      <!-- Fase de leitura: ator vê o personagem antes do timer começar -->
+      <div class="pre-start">
+        <p class="pre-start-label">Somente o ator deve olhar para a tela</p>
+
+        <div class="character-preview">
+          <div class="report-row">
+            <app-report-issue
+              modo="quem-sou-eu"
+              [perguntaId]="currentCard()!.nome"
+              [contexto]="currentCard()!.nome" />
+          </div>
+          @if (characterVisible) {
+            <div class="difficulty badge-{{ currentCard()!.dificuldade }}">{{ currentCard()!.dificuldade }}</div>
+            <p class="character-name">{{ currentCard()!.nome }}</p>
+          } @else {
+            <p class="character-masked">Toque o olho para ver o personagem</p>
+          }
+        </div>
+
+        <button class="btn-eye" (click)="toggleCharacterVisibility()" [title]="characterVisible ? 'Ocultar' : 'Revelar'">
+          {{ characterVisible ? '🙈' : '👁' }}
+        </button>
+
+        <button class="btn-start-acting" (click)="startActing()" [disabled]="!characterVisible">
+          Começar a mimar! &#9654;
+        </button>
+        @if (!characterVisible) {
+          <p class="start-hint">Revele o personagem antes de começar</p>
+        }
+        <button class="btn-pular-pre" (click)="pular()">&#8627; Pular este personagem</button>
+        <p class="pular-hint">Pular passa a vez para a próxima equipe, sem pontos</p>
+      </div>
+    }
+
+    @if (actingStarted && !actingResult) {
+      <!-- Fase de atuação: timer rodando -->
+      <div class="timer-bar">
+        <div class="timer-fill"
+             [style.width.%]="timerPercent()"
+             [class.urgent]="timerSeconds() <= 15"></div>
+      </div>
+
+      <div class="acting-header">
+        <span class="team-label">{{ currentTeam().name }}</span>
+        <span class="card-progress">{{ currentIndex() + 1 }} / {{ cards.length }}</span>
+        <div class="acting-timer" [class.urgent]="timerSeconds() <= 15">{{ timerSeconds() }}s</div>
+      </div>
+
+      <div class="character-card">
+        <p class="mime-instruction">Faça a mímica deste personagem:</p>
+        <div class="difficulty badge-{{ currentCard()!.dificuldade }}">{{ currentCard()!.dificuldade }}</div>
+
+        @if (characterVisible) {
+          <p class="character-name">{{ currentCard()!.nome }}</p>
+        } @else {
+          <p class="character-masked-sm">●  ●  ●  ●  ●</p>
+        }
+
+        <button class="btn-eye-sm" (click)="toggleCharacterVisibility()" [title]="characterVisible ? 'Ocultar' : 'Mostrar'">
+          {{ characterVisible ? '🙈' : '👁' }}
+        </button>
+      </div>
+
+      <div class="acting-actions">
+        <button class="btn-acertou" (click)="acertou()">&#10003; Equipe Acertou!</button>
+      </div>
+    }
+
+    @if (actingResult) {
+      <div class="acting-feedback"
+           [class.feedback-ok]="actingResult === 'acertou'"
+           [class.feedback-neutral]="actingResult === 'pulou' || actingResult === 'tempo'">
+        @if (actingResult === 'acertou') {
+          <p class="feedback-pts">+{{ pontosGanhos }} ponto{{ pontosGanhos === 1 ? '' : 's' }}</p>
+          <p class="feedback-team">Para {{ currentTeam().name }}!</p>
+        } @else if (actingResult === 'pulou') {
+          <p class="feedback-skip">Passou!</p>
+        } @else {
+          <p class="feedback-skip">Tempo esgotado!</p>
+        }
+      </div>
+    }
+
+  </div>
+}
+
+@if (phase === 'result') {
+  <div class="container result">
+    <h1>Resultado Final</h1>
+
+    <div class="winner">
+      @if (winners().length === 1) {
+        <p>Vencedora: <strong>{{ winners()[0].name }}</strong></p>
+      } @else {
+        <p>Empate entre {{ winners().length }} equipes!</p>
+      }
+    </div>
+
+    <div class="ranking">
+      @for (team of ranking(); track team.name; let pos = $index) {
+        <div class="ranking-item" [class.first]="pos === 0">
+          <span>{{ pos + 1 }}º</span>
+          <strong>{{ team.name }}</strong>
+          <em>{{ team.score }} ponto{{ team.score === 1 ? '' : 's' }}</em>
+        </div>
+      }
+    </div>
+
+    <div class="summary">
+      @for (rec of records; track $index) {
+        <div class="summary-item" [class.summary-ok]="rec.acertou" [class.summary-skip]="!rec.acertou">
+          <span class="summary-icon">{{ rec.acertou ? '&#10003;' : '&#8627;' }}</span>
+          <div>
+            <p class="summary-personagem">{{ rec.personagem }}</p>
+            <small>{{ rec.team }} &mdash; {{ rec.acertou ? '+' + rec.pontos + ' pt' + (rec.pontos === 1 ? '' : 's') : 'não acertou' }}</small>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" (click)="playAgain()">Jogar Novamente</button>
+      <button class="btn-secondary" (click)="newGame()">Nova Partida</button>
+      <a routerLink="/" class="btn-secondary">Início</a>
+    </div>
+  </div>
+}

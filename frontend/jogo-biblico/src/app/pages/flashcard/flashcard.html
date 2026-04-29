@@ -1,3 +1,7 @@
+@if (fase === 'rules') {
+  <app-rules-screen title="Flashcard Bíblico" [rules]="rules" (ready)="irParaConfig()" />
+}
+
 <!-- CONFIGURAÇÃO -->
 @if (fase === 'config') {
   <div class="container config">
@@ -59,6 +63,12 @@
     </div>
 
     <div class="card">
+      <div class="report-row">
+        <app-report-issue
+          modo="flashcard"
+          [perguntaId]="perguntaAtual()!.id"
+          [contexto]="perguntaAtual()!.pergunta" />
+      </div>
       <div class="card-badge badge-{{ perguntaAtual()!.dificuldade }}">
         {{ perguntaAtual()!.dificuldade }}
       </div>
