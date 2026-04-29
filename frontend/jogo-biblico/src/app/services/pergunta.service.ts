@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { ConfigService } from './config.service';
 import {
   CruzadinhaPublica,
   CruzadinhaResposta,
@@ -18,9 +19,9 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class PerguntaService {
-  private readonly api = 'http://localhost:5000';
+  private get api() { return this.config.apiUrl; }
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private config: ConfigService) {}
 
   getPerguntas(
     quantidade: number,
