@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { EquipesHubService } from '../../services/equipes-hub.service';
+import { RoomShareService } from '../../services/room-share.service';
 import {
   EquipeMultiEquipes,
   EstadoSalaEquipes,
@@ -45,6 +46,11 @@ export class EquipesMulti implements OnInit, OnDestroy {
   aguardando = signal(false);
   timerSeconds = signal(30);
   addTimeUses = signal(0);
+  joinUrl = signal('');
+  spectatorUrl = signal('');
+  qrCodeUrl = signal('');
+  shareFeedback = signal('');
+  connectionMessage = signal('');
 
   readonly ehMinhavez = computed(
     () => this.estadoSala()?.nomeEquipeAtual === this.minhaEquipe()
@@ -54,9 +60,20 @@ export class EquipesMulti implements OnInit, OnDestroy {
   private submittedTurn = false;
   private subs: Subscription[] = [];
 
-  constructor(private hub: EquipesHubService) {}
+  constructor(
+    private hub: EquipesHubService,
+    private route: ActivatedRoute,
+    private roomShare: RoomShareService
+  ) {}
 
   ngOnInit(): void {
+    const codigo = this.route.snapshot.queryParamMap.get('sala');
+    const modo = this.route.snapshot.queryParamMap.get('modo');
+    if (codigo) {
+      this.codigoEntrada = codigo.toUpperCase();
+      this.configMode.set(modo === 'assistir' ? 'assistir' : 'entrar');
+    }
+
     this.subs.push(
       this.hub.salaCriada$.subscribe(e => {
         this.codigoSala.set(e.codigoSala);
@@ -64,6 +81,7 @@ export class EquipesMulti implements OnInit, OnDestroy {
         this.ehAnfitriao.set(true);
         this.ehEspectador.set(false);
         this.estadoSala.set(e.estadoSala);
+        this.updateShareLinks(e.codigoSala);
         this.phase.set('lobby');
       }),
 
@@ -71,6 +89,7 @@ export class EquipesMulti implements OnInit, OnDestroy {
         this.minhaEquipe.set(e.minhaEquipe);
         this.estadoSala.set(e.estadoSala);
         this.codigoSala.set(e.estadoSala.codigoSala);
+        this.updateShareLinks(e.estadoSala.codigoSala);
         this.ehEspectador.set(false);
         this.phase.set('lobby');
       }),
@@ -148,6 +167,7 @@ export class EquipesMulti implements OnInit, OnDestroy {
         this.codigoSala.set(e.estadoSala.codigoSala);
         this.minhaEquipe.set('');
         this.perguntaDaVez.set(e.estadoSala.perguntaAtual ?? null);
+        this.updateShareLinks(e.estadoSala.codigoSala);
         this.phase.set(this.mapPhase(e.estadoSala.fase));
       }),
 
@@ -163,6 +183,19 @@ export class EquipesMulti implements OnInit, OnDestroy {
       this.hub.erroSala$.subscribe(msg => {
         this.erro.set(msg);
         this.aguardando.set(false);
+      }),
+
+      this.hub.reconectando$.subscribe(() => {
+        this.connectionMessage.set('Reconectando ao servidor...');
+      }),
+
+      this.hub.reconectado$.subscribe(() => {
+        this.connectionMessage.set('Conexao restabelecida.');
+        window.setTimeout(() => this.connectionMessage.set(''), 2500);
+      }),
+
+      this.hub.conexaoFechada$.subscribe(() => {
+        if (this.phase() !== 'config') this.connectionMessage.set('Conexao encerrada.');
       })
     );
   }
@@ -240,6 +273,17 @@ export class EquipesMulti implements OnInit, OnDestroy {
     await this.hub.avancarRodadaEquipes();
   }
 
+  async copiarCodigo(): Promise<void> {
+    const copied = await this.roomShare.copyText(this.codigoSala());
+    this.showShareFeedback(copied ? 'Codigo copiado.' : 'Nao foi possivel copiar.');
+  }
+
+  async copiarLink(role: 'entrar' | 'assistir'): Promise<void> {
+    const link = role === 'entrar' ? this.joinUrl() : this.spectatorUrl();
+    const copied = await this.roomShare.copyText(link);
+    this.showShareFeedback(copied ? 'Link copiado.' : 'Nao foi possivel copiar.');
+  }
+
   timerPercent(): number {
     return Math.max(0, Math.min(100, (this.timerSeconds() / 30) * 100));
   }
@@ -276,6 +320,11 @@ export class EquipesMulti implements OnInit, OnDestroy {
     this.aguardando.set(false);
     this.aguardandoEquipe.set('');
     this.addTimeUses.set(0);
+    this.joinUrl.set('');
+    this.spectatorUrl.set('');
+    this.qrCodeUrl.set('');
+    this.shareFeedback.set('');
+    this.connectionMessage.set('');
     this.submittedTurn = false;
   }
 
@@ -311,4 +360,16 @@ export class EquipesMulti implements OnInit, OnDestroy {
     return 'config';
   }
 
+  private async updateShareLinks(codigoSala: string): Promise<void> {
+    const joinUrl = this.roomShare.buildJoinUrl('equipes', codigoSala, 'entrar');
+    const spectatorUrl = this.roomShare.buildJoinUrl('equipes', codigoSala, 'assistir');
+    this.joinUrl.set(joinUrl);
+    this.spectatorUrl.set(spectatorUrl);
+    this.qrCodeUrl.set(await this.roomShare.buildQrCode(joinUrl));
+  }
+
+  private showShareFeedback(message: string): void {
+    this.shareFeedback.set(message);
+    window.setTimeout(() => this.shareFeedback.set(''), 2200);
+  }
 }
