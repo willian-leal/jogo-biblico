@@ -1,0 +1,309 @@
+<!-- CONFIG -->
+@if (phase() === 'config') {
+  <div class="container config">
+    <h1>&#128292; Forca em Rede</h1>
+    <p class="subtitle">Jogue com outras equipes pelo Wi-Fi</p>
+
+    <div class="mode-tabs">
+      <button [class.active]="configMode() === 'criar'" (click)="configMode.set('criar')">Criar Sala</button>
+      <button [class.active]="configMode() === 'entrar'" (click)="configMode.set('entrar')">Entrar na Sala</button>
+      <button [class.active]="configMode() === 'assistir'" (click)="configMode.set('assistir')">&#128250; Assistir</button>
+    </div>
+
+    @if (configMode() === 'assistir') {
+      <div class="form-group">
+        <label>Código da sala</label>
+        <input [(ngModel)]="codigoEntrada" placeholder="Ex: AB12CD" style="text-transform:uppercase" />
+      </div>
+
+      @if (erro()) {
+        <div class="erro">{{ erro() }}</div>
+      }
+
+      <div class="actions">
+        <a routerLink="/" class="btn-secondary">&#8592; Início</a>
+        <button class="btn-primary" (click)="entrarComoEspectador()">Conectar como espectador</button>
+      </div>
+    }
+
+    @if (configMode() === 'criar') {
+      <div class="form-group">
+        <label>Nome da sua equipe</label>
+        <input [(ngModel)]="nomeEquipe" placeholder="Ex: Discípulos" />
+      </div>
+
+      <div class="form-group">
+        <label>Dificuldade</label>
+        <select [(ngModel)]="dificuldade">
+          <option value="">Todas</option>
+          <option value="facil">Fácil</option>
+          <option value="medio">Médio</option>
+          <option value="dificil">Difícil</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Testamento</label>
+        <select [(ngModel)]="testamento">
+          <option value="">Todos</option>
+          <option value="AT">Antigo Testamento</option>
+          <option value="NT">Novo Testamento</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Rodadas</label>
+        <select [(ngModel)]="quantidade">
+          <option [ngValue]="3">3</option>
+          <option [ngValue]="5">5</option>
+          <option [ngValue]="10">10</option>
+        </select>
+      </div>
+    } @else {
+      <div class="form-group">
+        <label>Código da sala</label>
+        <input [(ngModel)]="codigoEntrada" placeholder="Ex: AB12CD" style="text-transform:uppercase" />
+      </div>
+
+      <div class="form-group">
+        <label>Nome da sua equipe</label>
+        <input [(ngModel)]="nomeEquipe" placeholder="Ex: Profetas" />
+      </div>
+    }
+
+    @if (erro()) {
+      <div class="erro">{{ erro() }}</div>
+    }
+
+    <div class="actions">
+      <a routerLink="/" class="btn-secondary">&#8592; Início</a>
+      @if (configMode() === 'criar') {
+        <button class="btn-primary" (click)="criarSala()">Criar Sala</button>
+      } @else {
+        <button class="btn-primary" (click)="entrarNaSala()">Entrar</button>
+      }
+    </div>
+  </div>
+}
+
+<!-- CONECTANDO -->
+@if (phase() === 'conectando') {
+  <div class="container center">
+    <p class="loading-text">Conectando...</p>
+  </div>
+}
+
+<!-- LOBBY -->
+@if (phase() === 'lobby') {
+  <div class="container lobby">
+    <div class="codigo-box">
+      <p class="codigo-label">Código da sala</p>
+      <h1 class="codigo">{{ codigoSala() }}</h1>
+      <p class="codigo-hint">Compartilhe este código com as outras equipes</p>
+    </div>
+
+    <div class="equipes-lobby">
+      <p class="equipes-label">Equipes na sala</p>
+      @for (equipe of estadoSala()?.equipes; track equipe.nome) {
+        <div class="equipe-item" [class.minha]="equipe.nome === minhaEquipe()">
+          {{ equipe.nome }}
+          @if (equipe.nome === minhaEquipe()) { <span class="tag-voce">você</span> }
+        </div>
+      }
+    </div>
+
+    @if (erro()) {
+      <div class="erro">{{ erro() }}</div>
+    }
+
+    @if (ehEspectador()) {
+      <p class="hint">Modo espectador — aguardando o anfitrião iniciar o jogo...</p>
+    } @else if (ehAnfitriao()) {
+      <div class="actions">
+        <button
+          class="btn-primary"
+          (click)="iniciarJogo()"
+          [disabled]="(estadoSala()?.equipes?.length ?? 0) < 2">
+          Iniciar Jogo
+        </button>
+        <button class="btn-secondary" (click)="voltarParaConfig()">Cancelar</button>
+      </div>
+      @if ((estadoSala()?.equipes?.length ?? 0) < 2) {
+        <p class="hint">Aguardando mais equipes entrarem...</p>
+      }
+    } @else {
+      <p class="hint">Aguardando o anfitrião iniciar o jogo...</p>
+      <button class="btn-secondary" (click)="voltarParaConfig()">Sair da sala</button>
+    }
+  </div>
+}
+
+<!-- TRANSITION -->
+@if (phase() === 'transition' && estadoSala()) {
+  <div class="container transition">
+    <div class="scoreboard">
+      @for (equipe of estadoSala()!.equipes; track equipe.nome) {
+        <div class="score-card" [class.active]="equipe.nome === estadoSala()!.nomeEquipeAtual">
+          <span>{{ equipe.nome }}</span>
+          <strong>{{ equipe.pontos }}</strong>
+        </div>
+      }
+    </div>
+
+    <div class="transition-body">
+      <p class="transition-label">Vez de</p>
+      <h1>{{ estadoSala()!.nomeEquipeAtual }}</h1>
+      <p class="transition-hint">
+        Rodada {{ estadoSala()!.indicePerguntaAtual + 1 }} de {{ estadoSala()!.totalPerguntas }}
+      </p>
+
+      @if (ehEspectador()) {
+        <p class="waiting-text spectator-label">&#128250; Transmissão ao vivo</p>
+      } @else if (ehMinhavez()) {
+        <button class="btn-primary btn-ready" (click)="marcarPronto()" [disabled]="aguardando()">
+          {{ aguardando() ? 'Aguardando...' : 'Pronto!' }}
+        </button>
+      } @else {
+        <p class="waiting-text">Aguardando {{ estadoSala()!.nomeEquipeAtual }} iniciar...</p>
+        @if (ehAnfitriao()) {
+          <button class="btn-secondary" (click)="forcarAvanco()">Forçar avanço</button>
+        }
+      }
+    </div>
+  </div>
+}
+
+<!-- PLAYING -->
+@if (phase() === 'playing' && estadoSala()?.perguntaAtual) {
+  <div class="container playing" [class.tv-mode]="ehEspectador()">
+
+    <!-- Placar -->
+    <div class="scoreboard" [class.scoreboard-tv]="ehEspectador()">
+      @for (equipe of estadoSala()!.equipes; track equipe.nome) {
+        <div class="score-card" [class.active]="equipe.nome === estadoSala()!.nomeEquipeAtual">
+          <span>{{ equipe.nome }}</span>
+          <strong>{{ equipe.pontos }}</strong>
+        </div>
+      }
+    </div>
+
+    <!-- Cabeçalho do turno -->
+    <div class="turn-header">
+      <div>
+        <span class="progress">{{ estadoSala()!.indicePerguntaAtual + 1 }} / {{ estadoSala()!.totalPerguntas }}</span>
+        @if (ehEspectador()) {
+          <h1>&#128250; Vez da {{ estadoSala()!.nomeEquipeAtual }}</h1>
+        } @else if (ehMinhavez()) {
+          <h1>Sua vez!</h1>
+        } @else {
+          <h1>Vez da {{ estadoSala()!.nomeEquipeAtual }}</h1>
+        }
+      </div>
+      @if (!ehEspectador() && ehMinhavez()) {
+        <button class="btn-guess" (click)="abrirChute()" [disabled]="aguardando() || guessing()">
+          Chutar personagem
+        </button>
+      }
+    </div>
+
+    <!-- Dica -->
+    <div class="question-card">
+      <div class="difficulty badge-{{ estadoSala()!.perguntaAtual!.dificuldade }}">
+        {{ estadoSala()!.perguntaAtual!.dificuldade }}
+      </div>
+      <p class="question-text">{{ estadoSala()!.perguntaAtual!.dica }}</p>
+    </div>
+
+    <!-- Máscara -->
+    <div class="mask" [class.mask-tv]="ehEspectador()" aria-label="Nome do personagem">
+      @for (char of estadoSala()!.perguntaAtual!.mascara; track $index) {
+        <span class="mask-cell" [class.space]="char === ' '">{{ char === ' ' ? '' : char }}</span>
+      }
+    </div>
+
+    <!-- Interação: equipe da vez, espectadores veem letras usadas/erradas -->
+    @if (!ehEspectador() && ehMinhavez()) {
+      <div class="alphabet">
+        @for (letter of alphabet; track letter) {
+          <button
+            class="letter"
+            [class.used]="isLetterUsed(letter)"
+            [class.wrong]="isLetterWrong(letter)"
+            (click)="escolherLetra(letter)"
+            [disabled]="aguardando() || isLetterUsed(letter) || guessing()">
+            {{ letter }}
+          </button>
+        }
+      </div>
+      @if (estadoSala()!.letrasErradas.length > 0) {
+        <p class="used-list">Letras erradas: {{ estadoSala()!.letrasErradas.join(', ') }}</p>
+      }
+    } @else if (!ehEspectador()) {
+      <div class="waiting-overlay">
+        @if (chuteAbertoPorEquipe()) {
+          <p>&#128161; {{ chuteAbertoPorEquipe() }} está tentando adivinhar...</p>
+        } @else {
+          <p>Acompanhe a vez da {{ estadoSala()!.nomeEquipeAtual }}</p>
+        }
+        @if (estadoSala()!.letrasErradas.length > 0) {
+          <p class="used-list">Letras erradas: {{ estadoSala()!.letrasErradas.join(', ') }}</p>
+        }
+      </div>
+    } @else {
+      <!-- View espectador: letras erradas e indicador de chute em aberto -->
+      @if (chuteAbertoPorEquipe()) {
+        <div class="spectator-guess-indicator">
+          &#128161; {{ chuteAbertoPorEquipe() }} está tentando adivinhar...
+        </div>
+      }
+      @if (estadoSala()!.letrasErradas.length > 0) {
+        <p class="used-list">Letras erradas: {{ estadoSala()!.letrasErradas.join(', ') }}</p>
+      }
+    }
+
+    @if (feedback()) {
+      <div class="feedback" [class.feedback-ok]="feedback()!.type === 'ok'" [class.feedback-err]="feedback()!.type === 'err'">
+        {{ feedback()!.message }}
+      </div>
+    }
+
+    @if (guessing() && ehMinhavez()) {
+      <div class="guess-panel">
+        <label>Chute da {{ minhaEquipe() }}</label>
+        <div class="guess-row">
+          <input [(ngModel)]="guess" placeholder="Nome do personagem" (keyup.enter)="enviarChute()" />
+          <button class="btn-primary" (click)="enviarChute()" [disabled]="!guess.trim() || aguardando()">Enviar</button>
+          <button class="btn-secondary" (click)="cancelarChute()" [disabled]="aguardando()">Cancelar</button>
+        </div>
+      </div>
+    }
+  </div>
+}
+
+<!-- RESULT -->
+@if (phase() === 'result') {
+  <div class="container result">
+    <h1>Resultado Final</h1>
+
+    <div class="winner">
+      @if (ranking()[0]) {
+        <p>Vencedora: <strong>{{ ranking()[0].nome }}</strong></p>
+      }
+    </div>
+
+    <div class="ranking">
+      @for (equipe of ranking(); track equipe.nome; let position = $index) {
+        <div class="ranking-item" [class.first]="position === 0">
+          <span>{{ position + 1 }}º</span>
+          <strong>{{ equipe.nome }}</strong>
+          <em>{{ equipe.pontos }} ponto{{ equipe.pontos === 1 ? '' : 's' }}</em>
+        </div>
+      }
+    </div>
+
+    <div class="actions">
+      <button class="btn-secondary" (click)="voltarParaConfig()">Nova Partida</button>
+      <a routerLink="/" class="btn-secondary">Início</a>
+    </div>
+  </div>
+}
