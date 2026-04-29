@@ -65,6 +65,23 @@ public class PerguntaService
         }) ?? [];
     }
 
+    public List<PerguntaEquipesSala> GetAleatorioParaHub(int quantidade, string? dificuldade, string? testamento)
+    {
+        return GetPerguntasFiltradas(dificuldade, testamento, null)
+            .OrderBy(_ => Guid.NewGuid())
+            .Take(quantidade)
+            .Select(p => new PerguntaEquipesSala
+            {
+                Id = p.Id,
+                Texto = p.Texto,
+                Resposta = p.Resposta,
+                Referencia = p.Referencia,
+                Dificuldade = p.Dificuldade,
+                Alternativas = p.Alternativas.OrderBy(_ => Guid.NewGuid()).ToList()
+            })
+            .ToList();
+    }
+
     public List<PerguntaPublicaDto> GetAleatorio(
         int quantidade,
         string? dificuldade,

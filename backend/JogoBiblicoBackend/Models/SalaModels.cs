@@ -2,6 +2,32 @@ namespace JogoBiblicoBackend.Models;
 
 public enum FaseJogo { Aguardando, Transicao, Jogando, Encerrada }
 
+public class PerguntaEquipesSala
+{
+    public string Id { get; set; } = "";
+    public string Texto { get; set; } = "";
+    public string Resposta { get; set; } = "";
+    public string Referencia { get; set; } = "";
+    public string Dificuldade { get; set; } = "";
+    public List<string> Alternativas { get; set; } = [];
+}
+
+public class SalaEquipes
+{
+    public string CodigoSala { get; set; } = "";
+    public List<PerguntaEquipesSala> Perguntas { get; set; } = [];
+    public List<EquipeSala> Equipes { get; set; } = [];
+    public List<JogadorConectado> Jogadores { get; set; } = [];
+    public int IndicePerguntaAtual { get; set; }
+    public int AddTimeUsesTurno { get; set; }
+    public FaseJogo Fase { get; set; } = FaseJogo.Aguardando;
+    public DateTimeOffset CriadaEm { get; set; } = DateTimeOffset.UtcNow;
+
+    public int IndiceEquipeAtual => IndicePerguntaAtual % Equipes.Count;
+    public PerguntaEquipesSala PerguntaAtual => Perguntas[IndicePerguntaAtual];
+    public EquipeSala EquipeAtual => Equipes[IndiceEquipeAtual];
+}
+
 public class EquipeSala
 {
     public string Nome { get; set; } = "";

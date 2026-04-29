@@ -20,6 +20,7 @@ builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddSingleton<PerguntaService>();
 builder.Services.AddSingleton<SalaService>();
+builder.Services.AddSingleton<SalaEquipesService>();
 builder.Services.AddSignalR();
 
 // JWT
@@ -198,5 +199,6 @@ app.MapPost("/perguntas/relatar-problema", async (RelatarProblemaRequest req, IW
 });
 
 app.MapHub<ForcaHub>("/hubs/forca");
+app.MapHub<EquipesHub>("/hubs/equipes");
 
 app.Run();
