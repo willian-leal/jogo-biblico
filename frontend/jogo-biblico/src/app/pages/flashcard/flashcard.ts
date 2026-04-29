@@ -10,6 +10,7 @@ import { ReportIssue } from '../../shared/report-issue/report-issue';
 type Fase = 'rules' | 'config' | 'revisando' | 'resultado';
 
 interface RegistroFlashcard {
+  perguntaId: string;
   pergunta: string;
   resposta: string;
   sabia: boolean;
@@ -107,6 +108,7 @@ export class Flashcard {
 
     if (atual) {
       this.registros.push({
+        perguntaId: atual.id,
         pergunta: atual.pergunta,
         resposta: this.respostaCorreta(),
         sabia

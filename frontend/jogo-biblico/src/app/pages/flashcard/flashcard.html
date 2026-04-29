@@ -141,6 +141,7 @@
               <p class="resumo-resposta">Resposta: {{ r.resposta }}</p>
             }
           </div>
+          <app-report-issue modo="flashcard" [perguntaId]="r.perguntaId" [contexto]="r.pergunta" />
         </div>
       }
     </div>
