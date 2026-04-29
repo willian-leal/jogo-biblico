@@ -192,6 +192,7 @@
           <strong>{{ record.team }}</strong>
           <span>{{ record.resultado }}: {{ record.respostaCorreta }}</span>
           <em>+{{ record.pontos }}</em>
+          <app-report-issue modo="forca" [perguntaId]="record.perguntaId" [contexto]="record.dica" />
         </div>
       }
     </div>

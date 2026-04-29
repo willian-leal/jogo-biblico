@@ -15,6 +15,7 @@ interface Team {
 }
 
 interface ForcaRecord {
+  perguntaId: string;
   team: string;
   dica: string;
   respostaCorreta: string;
@@ -183,6 +184,7 @@ export class Forca {
         }
 
         this.records.push({
+          perguntaId: current.id,
           team: this.currentTeam().name,
           dica: current.dica,
           respostaCorreta: result.respostaCorreta,
@@ -231,6 +233,7 @@ export class Forca {
 
     this.currentTeam().score += bonus;
     this.records.push({
+      perguntaId: current.id,
       team: this.currentTeam().name,
       dica: current.dica,
       respostaCorreta: answer,
