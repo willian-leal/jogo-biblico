@@ -26,6 +26,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/quem-sou-eu/quem-sou-eu').then(m => m.QuemSouEu)
   },
   {
+    path: 'forca/multi',
+    loadComponent: () => import('./pages/forca/forca-multi').then(m => m.ForcaMulti)
+  },
+  {
     path: 'forca',
     loadComponent: () => import('./pages/forca/forca').then(m => m.Forca)
   },
