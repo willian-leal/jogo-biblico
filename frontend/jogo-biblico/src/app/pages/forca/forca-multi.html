@@ -192,11 +192,11 @@
       <div>
         <span class="progress">{{ estadoSala()!.indicePerguntaAtual + 1 }} / {{ estadoSala()!.totalPerguntas }}</span>
         @if (ehEspectador()) {
-          <h1>&#128250; Vez da {{ estadoSala()!.nomeEquipeAtual }}</h1>
+          <h1>&#128250; Vez de {{ estadoSala()!.nomeEquipeAtual }}</h1>
         } @else if (ehMinhavez()) {
           <h1>Sua vez!</h1>
         } @else {
-          <h1>Vez da {{ estadoSala()!.nomeEquipeAtual }}</h1>
+          <h1>Vez de {{ estadoSala()!.nomeEquipeAtual }}</h1>
         }
       </div>
       @if (!ehEspectador() && ehMinhavez()) {
@@ -243,7 +243,7 @@
         @if (chuteAbertoPorEquipe()) {
           <p>&#128161; {{ chuteAbertoPorEquipe() }} está tentando adivinhar...</p>
         } @else {
-          <p>Acompanhe a vez da {{ estadoSala()!.nomeEquipeAtual }}</p>
+          <p>Acompanhe a Vez de {{ estadoSala()!.nomeEquipeAtual }}</p>
         }
         @if (estadoSala()!.letrasErradas.length > 0) {
           <p class="used-list">Letras erradas: {{ estadoSala()!.letrasErradas.join(', ') }}</p>
@@ -287,7 +287,7 @@
 
     <div class="winner">
       @if (ranking()[0]) {
-        <p>Vencedora: <strong>{{ ranking()[0].nome }}</strong></p>
+        <p>Vencedor: <strong>{{ ranking()[0].nome }}</strong></p>
       }
     </div>
 

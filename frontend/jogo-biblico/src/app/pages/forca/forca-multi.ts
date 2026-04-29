@@ -108,7 +108,7 @@ export class ForcaMulti implements OnInit, OnDestroy {
         if (e.finalizada) {
           this.feedback.set({ type: 'ok', message: `Personagem revelado: ${e.respostaCorreta}` });
         } else if (!e.acertou) {
-          this.feedback.set({ type: 'err', message: `Não tem "${e.letra}". Vez da ${e.nomeEquipeAtual}.` });
+          this.feedback.set({ type: 'err', message: `Não tem "${e.letra}". Vez de ${e.nomeEquipeAtual}.` });
         } else {
           this.feedback.set({ type: 'ok', message: `Letra "${e.letra}" encontrada! +${e.pontos} pontos.` });
         }
@@ -140,7 +140,7 @@ export class ForcaMulti implements OnInit, OnDestroy {
         if (e.correta) {
           this.feedback.set({ type: 'ok', message: `Acertou! Personagem: ${e.respostaCorreta} +${e.pontos} pontos.` });
         } else {
-          this.feedback.set({ type: 'err', message: `Errou! Vez da ${e.nomeEquipeAtual}.` });
+          this.feedback.set({ type: 'err', message: `Errou! Vez de ${e.nomeEquipeAtual}.` });
         }
       }),
 
