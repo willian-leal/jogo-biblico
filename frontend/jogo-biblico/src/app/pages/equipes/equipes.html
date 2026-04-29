@@ -178,6 +178,22 @@
       }
     </div>
 
+    <div class="summary">
+      @for (record of records; track $index) {
+        <div class="summary-item" [class.summary-ok]="record.correta" [class.summary-err]="!record.correta">
+          <span class="summary-icon">{{ record.correta ? '&#10003;' : '&#10007;' }}</span>
+          <div class="summary-text">
+            <p class="summary-meta">{{ record.team }} · {{ record.pontos }} ponto{{ record.pontos === 1 ? '' : 's' }}</p>
+            <p class="summary-question">{{ record.pergunta }}</p>
+            @if (!record.correta) {
+              <p class="summary-answer">Resposta: {{ record.respostaCorreta }}</p>
+            }
+          </div>
+          <app-report-issue modo="equipes" [perguntaId]="record.perguntaId" [contexto]="record.pergunta" />
+        </div>
+      }
+    </div>
+
     <div class="actions">
       <button class="btn-primary" (click)="playAgain()">Jogar Novamente</button>
       <button class="btn-secondary" (click)="newGame()">Nova Partida</button>

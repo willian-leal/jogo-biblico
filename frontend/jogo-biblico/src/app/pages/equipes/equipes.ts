@@ -16,6 +16,7 @@ interface Team {
 
 interface TeamRecord {
   team: string;
+  perguntaId: string;
   pergunta: string;
   respostaDada: string;
   respostaCorreta: string;
@@ -197,6 +198,7 @@ export class Equipes implements OnDestroy {
         }
         this.records.push({
           team: this.currentTeam().name,
+          perguntaId: current.id,
           pergunta: current.pergunta,
           respostaDada: answer || '(sem resposta)',
           respostaCorreta: result.respostaCorreta,
