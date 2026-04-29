@@ -38,6 +38,11 @@
   justify-content: center;
 }
 
+.mode-card--destaque {
+  border-color: #4ecdc4;
+  background: rgba(78, 205, 196, 0.1);
+}
+
 .mode-card {
   display: flex;
   flex-direction: column;
