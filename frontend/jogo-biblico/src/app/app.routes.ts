@@ -18,6 +18,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/vof/vof').then(m => m.Vof)
   },
   {
+    path: 'equipes/multi',
+    loadComponent: () => import('./pages/equipes/equipes-multi').then(m => m.EquipesMulti)
+  },
+  {
     path: 'equipes',
     loadComponent: () => import('./pages/equipes/equipes').then(m => m.Equipes)
   },

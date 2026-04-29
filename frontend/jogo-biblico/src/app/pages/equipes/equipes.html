@@ -63,6 +63,7 @@
 
     <div class="actions">
       <a routerLink="/" class="btn-secondary">&#8592; Início</a>
+      <a routerLink="/equipes/multi" class="btn-secondary">&#127760; Em Rede</a>
       <button class="btn-primary" (click)="startGame()" [disabled]="loading">
         {{ loading ? 'Carregando...' : 'Iniciar Partida' }}
       </button>
@@ -107,7 +108,7 @@
     <div class="turn-header">
       <div>
         <span class="progress">{{ currentIndex() + 1 }} / {{ questions.length }}</span>
-        <h1>Vez da {{ currentTeam().name }}</h1>
+        <h1>Vez de {{ currentTeam().name }}</h1>
       </div>
       <div class="timer-group">
         <div class="timer" [class.urgent]="timerSeconds() <= 8">{{ timerSeconds() }}s</div>
@@ -162,7 +163,7 @@
 
     <div class="winner">
       @if (winners().length === 1) {
-        <p>Vencedora: <strong>{{ winners()[0].name }}</strong></p>
+        <p>Vencedor: <strong>{{ winners()[0].name }}</strong></p>
       } @else {
         <p>Empate entre {{ winners().length }} equipes</p>
       }
