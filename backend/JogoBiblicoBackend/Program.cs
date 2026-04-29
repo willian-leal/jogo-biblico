@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using JogoBiblicoBackend.Data;
+using JogoBiblicoBackend.Hubs;
 using JogoBiblicoBackend.Models;
 using JogoBiblicoBackend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -18,6 +19,8 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddSingleton<PerguntaService>();
+builder.Services.AddSingleton<SalaService>();
+builder.Services.AddSignalR();
 
 // JWT
 var jwtSecret = builder.Configuration["Jwt:Secret"]!;
@@ -39,12 +42,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-// CORS
+// CORS — permite qualquer origem para suportar dispositivos na rede local
 builder.Services.AddCors(opt =>
     opt.AddDefaultPolicy(p =>
-        p.WithOrigins("http://localhost:4200")
+        p.SetIsOriginAllowed(_ => true)
          .AllowAnyHeader()
-         .AllowAnyMethod()));
+         .AllowAnyMethod()
+         .AllowCredentials()));
 
 var app = builder.Build();
 
@@ -192,5 +196,7 @@ app.MapPost("/perguntas/relatar-problema", async (RelatarProblemaRequest req, IW
 
     return Results.Ok();
 });
+
+app.MapHub<ForcaHub>("/hubs/forca");
 
 app.Run();
