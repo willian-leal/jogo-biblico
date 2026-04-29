@@ -1,9 +1,10 @@
 import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ForcaHubService } from '../../services/forca-hub.service';
+import { RoomShareService } from '../../services/room-share.service';
 import { EstadoSala, EquipeMulti } from '../../models/forca-multi.model';
 
 type MultiPhase = 'config' | 'conectando' | 'lobby' | 'transition' | 'playing' | 'result';
@@ -43,6 +44,11 @@ export class ForcaMulti implements OnInit, OnDestroy {
   // UI state
   erro = signal('');
   aguardando = signal(false);
+  joinUrl = signal('');
+  spectatorUrl = signal('');
+  qrCodeUrl = signal('');
+  shareFeedback = signal('');
+  connectionMessage = signal('');
 
   readonly alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
@@ -52,15 +58,27 @@ export class ForcaMulti implements OnInit, OnDestroy {
 
   private subs: Subscription[] = [];
 
-  constructor(private hub: ForcaHubService) {}
+  constructor(
+    private hub: ForcaHubService,
+    private route: ActivatedRoute,
+    private roomShare: RoomShareService
+  ) {}
 
   async ngOnInit(): Promise<void> {
+    const codigo = this.route.snapshot.queryParamMap.get('sala');
+    const modo = this.route.snapshot.queryParamMap.get('modo');
+    if (codigo) {
+      this.codigoEntrada = codigo.toUpperCase();
+      this.configMode.set(modo === 'assistir' ? 'assistir' : 'entrar');
+    }
+
     this.subs.push(
       this.hub.salaCriada$.subscribe(e => {
         this.codigoSala.set(e.codigoSala);
         this.minhaEquipe.set(e.minhaEquipe);
         this.ehAnfitriao.set(true);
         this.estadoSala.set(e.estadoSala);
+        this.updateShareLinks(e.codigoSala);
         this.phase.set('lobby');
       }),
 
@@ -68,6 +86,7 @@ export class ForcaMulti implements OnInit, OnDestroy {
         this.minhaEquipe.set(e.minhaEquipe);
         this.estadoSala.set(e.estadoSala);
         this.codigoSala.set(e.estadoSala.codigoSala);
+        this.updateShareLinks(e.estadoSala.codigoSala);
         this.phase.set('lobby');
       }),
 
@@ -153,6 +172,7 @@ export class ForcaMulti implements OnInit, OnDestroy {
         this.ehEspectador.set(true);
         this.estadoSala.set(e.estadoSala);
         this.codigoSala.set(e.estadoSala.codigoSala);
+        this.updateShareLinks(e.estadoSala.codigoSala);
         const fase = e.estadoSala.fase;
         if (fase === 'aguardando') this.phase.set('lobby');
         else if (fase === 'transicao') this.phase.set('transition');
@@ -173,6 +193,19 @@ export class ForcaMulti implements OnInit, OnDestroy {
       this.hub.erroSala$.subscribe(msg => {
         this.erro.set(msg);
         this.aguardando.set(false);
+      }),
+
+      this.hub.reconectando$.subscribe(() => {
+        this.connectionMessage.set('Reconectando ao servidor...');
+      }),
+
+      this.hub.reconectado$.subscribe(() => {
+        this.connectionMessage.set('Conexao restabelecida.');
+        window.setTimeout(() => this.connectionMessage.set(''), 2500);
+      }),
+
+      this.hub.conexaoFechada$.subscribe(() => {
+        if (this.phase() !== 'config') this.connectionMessage.set('Conexao encerrada.');
       })
     );
   }
@@ -256,6 +289,17 @@ export class ForcaMulti implements OnInit, OnDestroy {
     await this.hub.avancarRodada();
   }
 
+  async copiarCodigo(): Promise<void> {
+    const copied = await this.roomShare.copyText(this.codigoSala());
+    this.showShareFeedback(copied ? 'Codigo copiado.' : 'Nao foi possivel copiar.');
+  }
+
+  async copiarLink(role: 'entrar' | 'assistir'): Promise<void> {
+    const link = role === 'entrar' ? this.joinUrl() : this.spectatorUrl();
+    const copied = await this.roomShare.copyText(link);
+    this.showShareFeedback(copied ? 'Link copiado.' : 'Nao foi possivel copiar.');
+  }
+
   isLetterUsed(letra: string): boolean {
     return this.estadoSala()?.letrasUsadas?.includes(letra) ?? false;
   }
@@ -274,11 +318,29 @@ export class ForcaMulti implements OnInit, OnDestroy {
     this.ehEspectador.set(false);
     this.ranking.set([]);
     this.feedback.set(null);
+    this.joinUrl.set('');
+    this.spectatorUrl.set('');
+    this.qrCodeUrl.set('');
+    this.shareFeedback.set('');
+    this.connectionMessage.set('');
     this.erro.set('');
   }
 
   ngOnDestroy(): void {
     this.subs.forEach(s => s.unsubscribe());
     this.hub.desconectar();
+  }
+
+  private async updateShareLinks(codigoSala: string): Promise<void> {
+    const joinUrl = this.roomShare.buildJoinUrl('forca', codigoSala, 'entrar');
+    const spectatorUrl = this.roomShare.buildJoinUrl('forca', codigoSala, 'assistir');
+    this.joinUrl.set(joinUrl);
+    this.spectatorUrl.set(spectatorUrl);
+    this.qrCodeUrl.set(await this.roomShare.buildQrCode(joinUrl));
+  }
+
+  private showShareFeedback(message: string): void {
+    this.shareFeedback.set(message);
+    window.setTimeout(() => this.shareFeedback.set(''), 2200);
   }
 }

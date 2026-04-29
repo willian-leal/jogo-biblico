@@ -153,6 +153,39 @@ h1 {
   margin-top: 1rem;
 }
 
+.share-panel {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 0.85rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+
+  img {
+    width: 150px;
+    height: 150px;
+    border-radius: 0.5rem;
+    background: white;
+  }
+}
+
+.share-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.share-feedback {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: #4ecdc4;
+  font-weight: 700;
+  text-align: center;
+}
+
 // ── Transition ────────────────────────────────────────────────────────────────
 
 .transition-body {
@@ -474,6 +507,22 @@ h1 {
   justify-content: center;
 }
 
+.connection-banner {
+  position: sticky;
+  top: 0.75rem;
+  z-index: 10;
+  width: fit-content;
+  max-width: calc(100% - 2rem);
+  margin: 0 auto 0.75rem;
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  background: rgba(26, 26, 46, 0.94);
+  border: 1px solid rgba(78, 205, 196, 0.45);
+  color: #4ecdc4;
+  font-weight: 800;
+  text-align: center;
+}
+
 .actions {
   display: flex;
   gap: 1rem;
@@ -518,4 +567,6 @@ h1 {
   .mask-cell { width: 1.8rem; height: 2.3rem; font-size: 1.25rem; }
   .turn-header { flex-direction: column; align-items: flex-start; }
   .guess-row { grid-template-columns: 1fr; }
+  .share-panel { grid-template-columns: 1fr; justify-items: center; }
+  .share-actions { justify-content: center; }
 }

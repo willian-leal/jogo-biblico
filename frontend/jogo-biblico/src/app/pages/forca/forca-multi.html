@@ -86,6 +86,10 @@
   </div>
 }
 
+@if (connectionMessage()) {
+  <div class="connection-banner">{{ connectionMessage() }}</div>
+}
+
 <!-- CONECTANDO -->
 @if (phase() === 'conectando') {
   <div class="container center">
@@ -101,6 +105,20 @@
       <h1 class="codigo">{{ codigoSala() }}</h1>
       <p class="codigo-hint">Compartilhe este código com as outras equipes</p>
     </div>
+
+    @if (!ehEspectador() && qrCodeUrl()) {
+      <div class="share-panel">
+        <img [src]="qrCodeUrl()" alt="QR Code para entrar na sala" />
+        <div class="share-actions">
+          <button class="btn-secondary" (click)="copiarCodigo()">Copiar codigo</button>
+          <button class="btn-secondary" (click)="copiarLink('entrar')">Copiar link de equipe</button>
+          <button class="btn-secondary" (click)="copiarLink('assistir')">Copiar link de espectador</button>
+        </div>
+        @if (shareFeedback()) {
+          <p class="share-feedback">{{ shareFeedback() }}</p>
+        }
+      </div>
+    }
 
     <div class="equipes-lobby">
       <p class="equipes-label">Equipes na sala</p>
