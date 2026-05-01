@@ -1,12 +1,17 @@
 import { Injectable } from '@angular/core';
 import QRCode from 'qrcode';
 
-export type MultiRoomMode = 'forca' | 'equipes';
+export type MultiRoomMode = 'forca' | 'equipes' | 'maratona';
 
 @Injectable({ providedIn: 'root' })
 export class RoomShareService {
   buildJoinUrl(mode: MultiRoomMode, codigoSala: string, role: 'entrar' | 'assistir' = 'entrar'): string {
-    const path = mode === 'forca' ? '/forca/multi' : '/equipes/multi';
+    const pathByMode: Record<MultiRoomMode, string> = {
+      forca: '/forca/multi',
+      equipes: '/equipes/multi',
+      maratona: '/maratona'
+    };
+    const path = pathByMode[mode];
     const url = new URL(path, window.location.origin);
     url.searchParams.set('sala', codigoSala);
     url.searchParams.set('modo', role);

@@ -12,6 +12,7 @@ import {
   ForcaPerguntaPublica,
   PerguntaPublica,
   RelatarProblemaRequest,
+  SugerirPerguntaRequest,
   VerificarResponse,
   VofPerguntaPublica,
   VofVerificarResponse
@@ -161,6 +162,10 @@ export class PerguntaService {
 
   relatarProblema(payload: RelatarProblemaRequest): Observable<void> {
     return this.http.post<void>(`${this.api}/perguntas/relatar-problema`, payload);
+  }
+
+  sugerirPergunta(payload: SugerirPerguntaRequest): Observable<void> {
+    return this.http.post<void>(`${this.api}/perguntas/sugerir`, payload);
   }
 
   private formatPergunta(pergunta: PerguntaPublica): PerguntaPublica {
