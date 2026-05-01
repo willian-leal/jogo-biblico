@@ -46,6 +46,50 @@ public class PerguntaService
                 new("daniel", 2, "DANIEL", "Foi lancado na cova dos leoes", 4, 2, "vertical"),
                 new("sara", 3, "SARA", "Esposa de Abraao", 5, 1, "horizontal"),
                 new("jonas", 4, "JONAS", "Tentou fugir de uma designacao e foi engolido por um grande peixe", 6, 0, "horizontal")
+            ]),
+        new(
+            "nt-facil-1",
+            "facil",
+            "NT",
+            8,
+            [
+                // JESUS(3,2)h intersects JOAO(3,2)v at J, PEDRO(2,3)v at E
+                // PAULO(2,3)h intersects PEDRO(2,3)v at P
+                // MARIA(5,1)h intersects JOAO(3,2)v at A(5,2), PEDRO(2,3)v at R(5,3)
+                new("jesus", 1, "JESUS", "Filho de Deus que ensinou o amor ao proximo", 3, 2, "horizontal"),
+                new("joao", 2, "JOAO", "O discipulo amado que escreveu o quarto Evangelho", 3, 2, "vertical"),
+                new("pedro", 3, "PEDRO", "Pescador que se tornou lider dos apostolos", 2, 3, "vertical"),
+                new("paulo", 4, "PAULO", "Perseguia os cristaos antes de se converter no caminho de Damasco", 2, 3, "horizontal"),
+                new("maria", 5, "MARIA", "Mae de Jesus, virgem que recebeu o anuncio do anjo", 5, 1, "horizontal")
+            ]),
+        new(
+            "at-facil-2",
+            "facil",
+            "AT",
+            7,
+            [
+                // DAVI(0,3)h intersects DANIEL(0,3)v at D
+                // NOE(2,3)h intersects DANIEL(0,3)v at N(2,3)
+                // MOISES(3,1)h intersects DANIEL(0,3)v at I(3,3)
+                // ESTER(2,6)v intersects MOISES(3,1)h at S(3,6)
+                new("davi", 1, "DAVI", "Rei de Israel que venceu Golias com uma funda", 0, 3, "horizontal"),
+                new("daniel", 2, "DANIEL", "Foi lancado na cova dos leoes e saiu ileso", 0, 3, "vertical"),
+                new("noe", 3, "NOE", "Construiu uma arca e sobreviveu ao diluvio com sua familia", 2, 3, "horizontal"),
+                new("moises", 4, "MOISES", "Liderou os israelitas na saida do Egito e recebeu os dez mandamentos", 3, 1, "horizontal"),
+                new("ester", 5, "ESTER", "Rainha corajosa que arriscou a vida para salvar seu povo", 2, 6, "vertical")
+            ]),
+        new(
+            "at-medio-1",
+            "medio",
+            "AT",
+            7,
+            [
+                // ABRAAO(3,1)h intersects BOAZ(3,2)v at B, RUTE(3,3)v at R, ISAQUE(1,4)v at A(3,4), SARA(2,5)v at A(3,5)
+                new("abraao", 1, "ABRAAO", "Pai da fe, deixou sua terra a pedido de Deus e recebeu a promessa", 3, 1, "horizontal"),
+                new("boaz", 2, "BOAZ", "Parente de Noemi que se casou com Rute por amor e fidelidade", 3, 2, "vertical"),
+                new("rute", 3, "RUTE", "Moabita fiel que nao abandonou a sogra Noemi", 3, 3, "vertical"),
+                new("isaque", 4, "ISAQUE", "Filho prometido de Abraao, quase sacrificado no monte Moria", 1, 4, "vertical"),
+                new("sara", 5, "SARA", "Esposa de Abraao que deu a luz Isaque na velhice", 2, 5, "vertical")
             ])
     ];
     private readonly Dictionary<string, List<string>> _vofSessions = new();
