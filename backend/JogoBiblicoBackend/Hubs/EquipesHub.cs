@@ -34,6 +34,9 @@ public class EquipesHub : Hub
         var nomeEquipe = req.NomeEquipe.Trim();
         var sala = new SalaEquipes
         {
+            QuantidadePorEquipe = req.Quantidade,
+            FiltroDificuldade = req.Dificuldade,
+            FiltroTestamento = req.Testamento,
             Perguntas = perguntas,
             Equipes = [new EquipeSala { Nome = nomeEquipe, Pontos = 0 }],
             Jogadores = [new JogadorConectado(Context.ConnectionId, nomeEquipe, EhAnfitriao: true)]
@@ -110,15 +113,28 @@ public class EquipesHub : Hub
                 erroLock = "O jogo já foi iniciado.";
             else if (sala.Equipes.Count < 2)
                 erroLock = "São necessárias pelo menos 2 equipes para iniciar.";
-            else
-            {
-                sala.Fase = FaseJogo.Transicao;
-                sala.IndicePerguntaAtual = 0;
-                sala.AddTimeUsesTurno = 0;
-            }
         }
 
         if (erroLock is not null) { await Clients.Caller.SendAsync("ErroSala", erroLock); return; }
+
+        var perguntas = _perguntaService.GetAleatorioParaHub(
+            sala!.QuantidadePorEquipe * sala.Equipes.Count,
+            sala.FiltroDificuldade,
+            sala.FiltroTestamento);
+
+        if (perguntas.Count == 0)
+        {
+            await Clients.Caller.SendAsync("ErroSala", "Não há perguntas suficientes para iniciar o jogo com os filtros selecionados.");
+            return;
+        }
+
+        lock (sala)
+        {
+            sala.Perguntas = perguntas;
+            sala.Fase = FaseJogo.Transicao;
+            sala.IndicePerguntaAtual = 0;
+            sala.AddTimeUsesTurno = 0;
+        }
 
         await Clients.Group(sala!.CodigoSala).SendAsync("ProximaRodada", BuildEstadoSala(sala));
     }

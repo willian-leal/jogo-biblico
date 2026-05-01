@@ -31,7 +31,7 @@ public class AuthService
         await _db.SaveChangesAsync();
 
         var token = _tokenService.GerarToken(user);
-        return new AuthResponse(token, user.Name, user.Email);
+        return new AuthResponse(token, user.Name, user.Email, user.IsAdmin);
     }
 
     public async Task<AuthResponse?> LoginAsync(LoginRequest req)
@@ -43,6 +43,6 @@ public class AuthService
             return null;
 
         var token = _tokenService.GerarToken(user);
-        return new AuthResponse(token, user.Name, user.Email);
+        return new AuthResponse(token, user.Name, user.Email, user.IsAdmin);
     }
 }

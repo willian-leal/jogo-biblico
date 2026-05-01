@@ -65,6 +65,78 @@ public class PerguntaService
         }) ?? [];
     }
 
+    public List<PerguntaMaratonaSala> GetParaMaratona(TipoModoMaratona tipo, int quantidade, string? dificuldade, string? testamento) =>
+        tipo switch
+        {
+            TipoModoMaratona.Quiz => GetPerguntasFiltradas(dificuldade, testamento, null)
+                .OrderBy(_ => Guid.NewGuid()).Take(quantidade)
+                .Select(p => new PerguntaMaratonaSala
+                {
+                    Id = p.Id, Texto = p.Texto, Resposta = p.Resposta,
+                    Referencia = p.Referencia, Dificuldade = p.Dificuldade,
+                    Alternativas = p.Alternativas.OrderBy(_ => Guid.NewGuid()).ToList()
+                }).ToList(),
+
+            TipoModoMaratona.VerdadeiroOuFalso => GetPerguntasFiltradas(dificuldade, testamento, null)
+                .Where(p => p.Alternativas.Any(a => !SameAnswer(a, p.Resposta)))
+                .OrderBy(_ => Guid.NewGuid()).Take(quantidade)
+                .Select(p =>
+                {
+                    var isTrue = Random.Shared.Next(2) == 0;
+                    var answer = isTrue ? p.Resposta : PickWrongAlternative(p);
+                    return new PerguntaMaratonaSala
+                    {
+                        Id = p.Id,
+                        Texto = $"{RemoveQuestionMark(p.Texto)} → {answer} — Verdadeiro ou Falso?",
+                        Resposta = isTrue ? "verdadeiro" : "falso",
+                        Referencia = p.Referencia, Dificuldade = p.Dificuldade,
+                        Alternativas = ["Verdadeiro", "Falso"]
+                    };
+                }).ToList(),
+
+            TipoModoMaratona.Forca => GetPerguntasFiltradas(dificuldade, testamento, personagem: true)
+                .OrderBy(_ => Guid.NewGuid()).Take(quantidade)
+                .Select(p => new PerguntaMaratonaSala
+                {
+                    Id = p.Id, Texto = RemoveReferenceHint(p.Texto), Resposta = p.Resposta,
+                    Referencia = p.Referencia, Dificuldade = p.Dificuldade, Alternativas = []
+                }).ToList(),
+
+            TipoModoMaratona.QuemSouEu => GetPerguntasFiltradas(dificuldade, testamento, personagem: true)
+                .OrderBy(_ => Guid.NewGuid()).Take(quantidade)
+                .Select(p => new PerguntaMaratonaSala
+                {
+                    Id = p.Id, Texto = p.Resposta, Resposta = p.Resposta,
+                    Referencia = p.Referencia, Dificuldade = p.Dificuldade, Alternativas = []
+                }).ToList(),
+
+            _ => []
+        };
+
+    public static List<string> ComputarMascaraForca(string resposta, IReadOnlyCollection<string> letrasReveladas)
+    {
+        var normalized = NormalizarTextoForca(resposta);
+        var result = new List<string>();
+        for (var i = 0; i < resposta.Length; i++)
+        {
+            var original = resposta[i];
+            if (!char.IsLetter(original)) { result.Add(original == ' ' ? " " : original.ToString()); continue; }
+            var normChar = i < normalized.Length ? normalized[i].ToString() : "_";
+            result.Add(letrasReveladas.Contains(normChar) ? original.ToString() : "_");
+        }
+        return result;
+    }
+
+    public static string NormalizarTextoForca(string value)
+    {
+        var normalized = value.Trim().Normalize(System.Text.NormalizationForm.FormD);
+        var chars = normalized
+            .Where(c => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c)
+                        != System.Globalization.UnicodeCategory.NonSpacingMark)
+            .Select(char.ToUpperInvariant);
+        return new string(chars.ToArray()).Normalize(System.Text.NormalizationForm.FormC);
+    }
+
     public List<PerguntaEquipesSala> GetAleatorioParaHub(int quantidade, string? dificuldade, string? testamento)
     {
         return GetPerguntasFiltradas(dificuldade, testamento, null)
@@ -368,32 +440,17 @@ public class PerguntaService
     {
         var normalized = NormalizeForcaText(answer);
         var result = new List<string>();
-
         for (var i = 0; i < answer.Length; i++)
         {
             var original = answer[i];
-            if (!char.IsLetter(original))
-            {
-                result.Add(original == ' ' ? " " : original.ToString());
-                continue;
-            }
-
+            if (!char.IsLetter(original)) { result.Add(original == ' ' ? " " : original.ToString()); continue; }
             var normalizedChar = normalized.ElementAtOrDefault(i);
             result.Add(revealedLetters.Contains(normalizedChar) ? original.ToString() : "_");
         }
-
         return result;
     }
 
-    private static string NormalizeForcaText(string value)
-    {
-        var normalized = value.Trim().Normalize(System.Text.NormalizationForm.FormD);
-        var chars = normalized
-            .Where(c => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark)
-            .Select(char.ToUpperInvariant);
-
-        return new string(chars.ToArray()).Normalize(System.Text.NormalizationForm.FormC);
-    }
+    private static string NormalizeForcaText(string value) => NormalizarTextoForca(value);
 
     private record ForcaDesafio(
         string Id,

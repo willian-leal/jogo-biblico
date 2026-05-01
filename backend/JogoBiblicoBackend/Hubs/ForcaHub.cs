@@ -271,8 +271,8 @@ public class ForcaHub : Hub
         {
             if (resultado.Correta)
             {
-                sala.EquipeAtual.Pontos += 5;
-                pontos = 5;
+                pontos = sala.LetrasUsadas.Count == 0 ? 5 : 0;
+                sala.EquipeAtual.Pontos += pontos;
             }
             else
             {
