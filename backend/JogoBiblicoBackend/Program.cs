@@ -5,6 +5,7 @@ using JogoBiblicoBackend.Data;
 using JogoBiblicoBackend.Hubs;
 using JogoBiblicoBackend.Models;
 using JogoBiblicoBackend.Services;
+using Microsoft.Data.Sqlite;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -18,8 +19,10 @@ if (!string.IsNullOrWhiteSpace(renderPort))
 }
 
 // Banco de dados SQLite
+var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=jogo_biblico.db";
+EnsureSqliteDirectory(defaultConnection);
 builder.Services.AddDbContext<AppDbContext>(opt =>
-    opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    opt.UseSqlite(defaultConnection));
 
 // Serviços
 builder.Services.AddScoped<TokenService>();
@@ -339,4 +342,16 @@ static string NormalizeStatus(string? status, string fallback)
 {
     var normalized = status?.Trim().ToLowerInvariant();
     return string.IsNullOrWhiteSpace(normalized) ? fallback : normalized;
+}
+
+static void EnsureSqliteDirectory(string connectionString)
+{
+    var sqlite = new SqliteConnectionStringBuilder(connectionString);
+    var dataSource = sqlite.DataSource;
+    if (string.IsNullOrWhiteSpace(dataSource) || dataSource.Equals(":memory:", StringComparison.OrdinalIgnoreCase))
+        return;
+
+    var directory = Path.GetDirectoryName(Path.GetFullPath(dataSource));
+    if (!string.IsNullOrWhiteSpace(directory))
+        Directory.CreateDirectory(directory);
 }
