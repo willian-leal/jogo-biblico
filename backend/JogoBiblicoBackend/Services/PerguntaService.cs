@@ -98,7 +98,7 @@ public class PerguntaService
                 .OrderBy(_ => Guid.NewGuid()).Take(quantidade)
                 .Select(p => new PerguntaMaratonaSala
                 {
-                    Id = p.Id, Texto = RemoveReferenceHint(p.Texto), Resposta = p.Resposta,
+                    Id = p.Id, Texto = BuildForcaHint(p), Resposta = p.Resposta,
                     Referencia = p.Referencia, Dificuldade = p.Dificuldade, Alternativas = []
                 }).ToList(),
 
@@ -237,7 +237,7 @@ public class PerguntaService
             .Select(p => new ForcaDesafio(
                 p.Id,
                 p.Resposta,
-                RemoveReferenceHint(p.Texto),
+                BuildForcaHint(p),
                 p.Dificuldade,
                 p.Testamento,
                 p.Referencia))
@@ -413,6 +413,59 @@ public class PerguntaService
             return trimmed[..openIndex].Trim().TrimEnd('?', '.', ' ', '\t', '\r', '\n');
 
         return RemoveQuestionMark(trimmed);
+    }
+
+    private static string BuildForcaHint(Pergunta pergunta)
+    {
+        var hint = RemoveReferenceHint(pergunta.Texto);
+        hint = RemoveAnswerFromHint(hint, pergunta.Resposta);
+
+        if (LooksLikeAnswerQuestion(hint) || hint.Length < 12)
+            hint = BuildGenericForcaHint(pergunta);
+
+        return hint;
+    }
+
+    private static string BuildGenericForcaHint(Pergunta pergunta)
+    {
+        if (!string.IsNullOrWhiteSpace(pergunta.Referencia))
+            return $"Personagem biblico citado em {pergunta.Referencia}";
+
+        return pergunta.Testamento.Equals("AT", StringComparison.OrdinalIgnoreCase)
+            ? "Personagem biblico do Antigo Testamento"
+            : "Personagem biblico do Novo Testamento";
+    }
+
+    private static bool LooksLikeAnswerQuestion(string hint)
+    {
+        var normalized = NormalizeForcaText(hint).ToLowerInvariant();
+        var prefixes = new[]
+        {
+            "quem ",
+            "que personagem",
+            "qual personagem",
+            "nome de quem",
+            "o nome de quem",
+            "personagem que"
+        };
+
+        return prefixes.Any(prefix => normalized.StartsWith(prefix));
+    }
+
+    private static string RemoveAnswerFromHint(string hint, string answer)
+    {
+        var result = hint;
+        foreach (var part in answer.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (part.Length < 3) continue;
+            result = System.Text.RegularExpressions.Regex.Replace(
+                result,
+                $@"\b{System.Text.RegularExpressions.Regex.Escape(part)}\b",
+                "_____",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        }
+
+        return result.Trim();
     }
 
     private static bool SameAnswer(string left, string right)
