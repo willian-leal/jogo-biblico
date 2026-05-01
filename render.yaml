@@ -1,5 +1,17 @@
 services:
   - type: web
+    name: jogo-biblico-frontend
+    runtime: static
+    rootDir: frontend/jogo-biblico
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist/jogo-biblico/browser
+    autoDeploy: true
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  - type: web
     name: jogo-biblico-backend
     runtime: docker
     rootDir: backend/JogoBiblicoBackend
