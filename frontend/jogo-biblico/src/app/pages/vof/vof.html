@@ -64,7 +64,11 @@
           [perguntaId]="currentQuestion()!.id"
           [contexto]="currentQuestion()!.afirmacao" />
       </div>
-      <p>{{ currentQuestion()!.afirmacao }}</p>
+      <p class="statement-text">{{ questionText() }}</p>
+      <div class="proposta-box">
+        <span class="proposta-label">Resposta proposta</span>
+        <strong class="proposta-valor">{{ proposedAnswer() }}</strong>
+      </div>
     </div>
 
     <div class="vof-actions">

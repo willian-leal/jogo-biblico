@@ -57,11 +57,12 @@ h1 {
 }
 
 .link-voltar {
-  color: rgba(255,255,255,0.7);
+  color: var(--jw-muted);
   text-decoration: none;
   font-size: 0.9rem;
+  font-family: var(--jw-body);
 
-  &:hover { color: white; }
+  &:hover { color: var(--jw-ink); }
 }
 
 .contadores {
@@ -70,22 +71,23 @@ h1 {
   align-items: center;
   font-size: 0.95rem;
 
-  .contador-acerto { color: #27ae60; font-weight: 600; }
-  .contador-progresso { opacity: 0.6; }
-  .contador-erro { color: #e74c3c; font-weight: 600; }
+  .contador-acerto { color: var(--jw-good); font-weight: 600; }
+  .contador-progresso { color: var(--jw-muted); }
+  .contador-erro { color: var(--jw-bad); font-weight: 600; }
 }
 
 .card {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
+  background: var(--jw-card);
+  border: 1px solid var(--jw-line);
   border-radius: 1.25rem;
   padding: 2rem;
   min-height: 300px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   text-align: center;
   gap: 1rem;
+  box-shadow: var(--jw-shadow-hover);
 }
 
 .card-badge {
@@ -101,94 +103,99 @@ h1 {
 .badge-medio { background: #f39c12; }
 .badge-dificil { background: #e74c3c; }
 
-.card-pergunta {
+.flashcard-pergunta {
   font-size: 1.2rem;
   line-height: 1.6;
   margin: 0;
   flex: 1;
+  color: var(--jw-ink);
+  text-align: center;
 }
 
 .card-referencia {
   font-size: 0.8rem;
-  opacity: 0.55;
+  color: var(--jw-muted);
   font-style: italic;
   margin: 0;
+  text-align: center;
 }
 
 .btn-revelar {
   padding: 0.75rem 2rem;
-  background: rgba(78,205,196,0.2);
-  border: 2px solid #4ecdc4;
-  color: #4ecdc4;
+  background: rgba(232, 98, 42, 0.08);
+  border: 2px solid var(--jw-accent);
+  color: var(--jw-accent);
   border-radius: 0.75rem;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
   margin-top: auto;
+  align-self: center;
 
-  &:hover:not(:disabled) { background: rgba(78,205,196,0.35); }
+  &:hover:not(:disabled) { background: rgba(232, 98, 42, 0.16); }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
 .resposta-box {
-  background: rgba(255,255,255,0.08);
+  background: rgba(232, 98, 42, 0.05);
   border-radius: 0.75rem;
   padding: 1rem 1.5rem;
-  width: 100%;
-  border-left: 3px solid #4ecdc4;
+  border-left: 3px solid var(--jw-accent);
+  text-align: left;
 
   .resposta-label {
-    font-size: 0.8rem;
-    opacity: 0.6;
+    font-size: 0.75rem;
+    color: var(--jw-muted);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.1em;
+    font-family: var(--jw-title);
     margin: 0 0 0.4rem;
   }
 
   .resposta-texto {
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: 1.15rem;
+    font-weight: 700;
     margin: 0;
-    color: #4ecdc4;
+    color: var(--jw-accent);
+    font-family: var(--jw-title);
   }
 }
 
 .julgamento {
   display: flex;
   gap: 1rem;
-  width: 100%;
   margin-top: 0.5rem;
 }
 
 .btn-nao-sabia {
   flex: 1;
   padding: 0.75rem;
-  background: rgba(231,76,60,0.2);
-  border: 2px solid #e74c3c;
-  color: #e74c3c;
+  background: rgba(197, 48, 48, 0.08);
+  border: 2px solid var(--jw-bad);
+  color: var(--jw-bad);
   border-radius: 0.75rem;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
 
-  &:hover { background: rgba(231,76,60,0.35); }
+  &:hover { background: rgba(197, 48, 48, 0.16); }
 }
 
 .btn-sabia {
   flex: 1;
   padding: 0.75rem;
-  background: rgba(39,174,96,0.2);
-  border: 2px solid #27ae60;
-  color: #27ae60;
+  background: rgba(39, 103, 73, 0.08);
+  border: 2px solid var(--jw-good);
+  color: var(--jw-good);
   border-radius: 0.75rem;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
 
-  &:hover { background: rgba(39,174,96,0.35); }
+  &:hover { background: rgba(39, 103, 73, 0.16); }
 }
 
 // --- Resultado ---

@@ -65,14 +65,16 @@ h1 {
 .timer {
   font-size: 1.4rem;
   font-weight: 700;
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--jw-card);
+  border: 1px solid var(--jw-line);
   padding: 0.2rem 0.8rem;
   border-radius: 0.5rem;
   min-width: 3.5rem;
   text-align: center;
+  color: var(--jw-ink);
 
   &.urgent {
-    color: #ff6b6b;
+    color: var(--jw-bad);
     animation: pulse 0.5s infinite alternate;
   }
 }
@@ -97,20 +99,50 @@ h1 {
 }
 
 .statement-card {
-  min-height: 220px;
-  display: grid;
-  place-items: center;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--jw-card);
+  border: 1px solid var(--jw-line);
   border-radius: 1rem;
-  padding: 2rem;
+  padding: 1.5rem 2rem 1.75rem;
   margin-bottom: 1.5rem;
-  text-align: center;
+  box-shadow: var(--jw-shadow-hover);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
 
-  p {
-    font-size: 1.55rem;
-    line-height: 1.45;
-    margin: 0;
-  }
+.statement-text {
+  font-size: 1.35rem;
+  line-height: 1.5;
+  margin: 0;
+  color: var(--jw-ink);
+  text-align: center;
+}
+
+.proposta-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.85rem 1.25rem;
+  background: var(--jw-card-soft);
+  border: 1px solid var(--jw-line-strong);
+  border-radius: 0.75rem;
+}
+
+.proposta-label {
+  font-size: 0.72rem;
+  color: var(--jw-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-family: var(--jw-title);
+}
+
+.proposta-valor {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--jw-ink);
+  font-family: var(--jw-title);
+  letter-spacing: 0.04em;
 }
 
 .vof-actions {

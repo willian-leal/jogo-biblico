@@ -79,19 +79,20 @@ h1 {
   gap: 3px;
   width: 100%;
   aspect-ratio: 1;
-  background: rgba(255, 255, 255, 0.14);
+  background: var(--jw-line-strong);
   padding: 3px;
   border-radius: 0.75rem;
+  border: 1px solid var(--jw-line-strong);
 }
 
 .cell {
   position: relative;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--jw-card);
   border-radius: 0.25rem;
   min-width: 0;
 
   &.blocked {
-    background: rgba(0, 0, 0, 0.28);
+    background: rgba(28, 24, 20, 0.08);
   }
 
   input {
@@ -100,8 +101,8 @@ h1 {
     padding: 0.25rem;
     border: 0;
     outline: 0;
-    background: transparent;
-    color: #1a1a2e;
+    background: transparent !important;
+    color: var(--jw-ink);
     font-size: 1.25rem;
     font-weight: 800;
     text-align: center;
@@ -114,10 +115,11 @@ h1 {
   position: absolute;
   top: 0.12rem;
   left: 0.18rem;
-  color: #1a1a2e;
+  color: var(--jw-muted);
   font-size: 0.6rem;
   font-weight: 800;
   line-height: 1;
+  pointer-events: none;
 }
 
 .clues {
@@ -125,9 +127,11 @@ h1 {
   gap: 1rem;
 
   h2 {
-    font-size: 1rem;
+    font-size: 0.78rem;
     margin: 0 0 0.5rem;
-    opacity: 0.75;
+    color: var(--jw-muted);
+    font-family: var(--jw-title);
+    letter-spacing: 0.2em;
     text-transform: uppercase;
   }
 }
@@ -140,14 +144,16 @@ h1 {
   align-items: start;
   margin-bottom: 0.5rem;
   padding: 0.75rem;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: var(--jw-card);
+  border: 1px solid var(--jw-line);
   border-radius: 0.75rem;
-  color: white;
+  color: var(--jw-ink);
   text-align: left;
+  box-shadow: var(--jw-shadow);
 
   strong {
-    color: #4ecdc4;
+    color: var(--jw-accent);
+    font-family: var(--jw-title);
   }
 
   span {
@@ -155,13 +161,17 @@ h1 {
   }
 
   &.correct {
-    border-color: #27ae60;
-    background: rgba(39, 174, 96, 0.24);
+    border-color: rgba(39, 103, 73, 0.45);
+    background: #e8f5ee;
+    color: var(--jw-good);
+    strong { color: var(--jw-good); }
   }
 
   &.wrong {
-    border-color: #e74c3c;
-    background: rgba(231, 76, 60, 0.22);
+    border-color: rgba(197, 48, 48, 0.45);
+    background: #fde8e8;
+    color: var(--jw-bad);
+    strong { color: var(--jw-bad); }
   }
 }
 
@@ -171,7 +181,9 @@ h1 {
   border-radius: 0.75rem;
   text-align: center;
   font-weight: 700;
-  background: rgba(78, 205, 196, 0.18);
+  background: var(--jw-card-soft);
+  border: 1px solid var(--jw-line);
+  color: var(--jw-ink);
 }
 
 .erro {

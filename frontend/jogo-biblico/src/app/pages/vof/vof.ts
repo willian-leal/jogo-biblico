@@ -57,6 +57,23 @@ export class Vof implements OnDestroy {
     this.questions.length ? Math.round((this.score() / this.questions.length) * 100) : 0
   );
 
+  readonly questionText = computed(() => {
+    const q = this.currentQuestion();
+    if (!q) return '';
+    const idx = q.afirmacao.indexOf(' → ');
+    return idx !== -1 ? q.afirmacao.substring(0, idx) : q.afirmacao;
+  });
+
+  readonly proposedAnswer = computed(() => {
+    const q = this.currentQuestion();
+    if (!q) return '';
+    const arrowIdx = q.afirmacao.indexOf(' → ');
+    if (arrowIdx === -1) return '';
+    const rest = q.afirmacao.substring(arrowIdx + 3);
+    const dashIdx = rest.indexOf(' — ');
+    return dashIdx !== -1 ? rest.substring(0, dashIdx) : rest;
+  });
+
   constructor(private perguntaService: PerguntaService) {}
 
   goToConfig() {
