@@ -1,6 +1,7 @@
 <div class="rules-wrapper">
-  <h1>{{ title }}</h1>
   <p class="subtitle">Como funciona</p>
+  <h1>{{ title }}</h1>
+  <div class="ornament" aria-hidden="true"><span></span><strong>*</strong><span></span></div>
 
   <ul class="rules-list">
     @for (rule of rules; track rule.text) {
@@ -11,5 +12,5 @@
     }
   </ul>
 
-  <button class="btn-ready" (click)="ready.emit()">Entendido, vamos jogar!</button>
+  <button class="btn-ready" (click)="ready.emit()">Entendido</button>
 </div>
