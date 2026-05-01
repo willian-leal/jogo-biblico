@@ -1,8 +1,10 @@
 <!-- CONFIG -->
 @if (phase() === 'config') {
   <div class="container config">
-    <h1>&#128292; Forca em Rede</h1>
-    <p class="subtitle">Jogue com outras equipes pelo Wi-Fi</p>
+    <a routerLink="/" class="config-back">← Voltar ao início</a>
+    <p class="subtitle">Configuração</p>
+    <h1>Forca em Rede</h1>
+    <div class="config-ornament" aria-hidden="true"><span></span><strong>*</strong><span></span></div>
 
     <div class="mode-tabs">
       <button [class.active]="configMode() === 'criar'" (click)="configMode.set('criar')">Criar Sala</button>
@@ -21,7 +23,6 @@
       }
 
       <div class="actions">
-        <a routerLink="/" class="btn-secondary">&#8592; Início</a>
         <button class="btn-primary" (click)="entrarComoEspectador()">Conectar como espectador</button>
       </div>
     }
@@ -76,7 +77,6 @@
     }
 
     <div class="actions">
-      <a routerLink="/" class="btn-secondary">&#8592; Início</a>
       @if (configMode() === 'criar') {
         <button class="btn-primary" (click)="criarSala()">Criar Sala</button>
       } @else {
@@ -219,13 +219,19 @@
       </div>
       @if (!ehEspectador() && ehMinhavez()) {
         <button class="btn-guess" (click)="abrirChute()" [disabled]="aguardando() || guessing()">
-          Chutar personagem
+          Chutar personagem {{ chuteCompletoValeBonus() ? '(+5pts)' : '(+0pt)' }}
         </button>
       }
     </div>
 
     <!-- Dica -->
     <div class="question-card">
+      <div class="report-row">
+        <app-report-issue
+          modo="forca-em-rede"
+          [perguntaId]="estadoSala()!.perguntaAtual!.id"
+          [contexto]="estadoSala()!.perguntaAtual!.dica" />
+      </div>
       <div class="difficulty badge-{{ estadoSala()!.perguntaAtual!.dificuldade }}">
         {{ estadoSala()!.perguntaAtual!.dificuldade }}
       </div>
@@ -240,42 +246,37 @@
     </div>
 
     <!-- Interação: equipe da vez, espectadores veem letras usadas/erradas -->
-    @if (!ehEspectador() && ehMinhavez()) {
-      <div class="alphabet">
-        @for (letter of alphabet; track letter) {
-          <button
-            class="letter"
-            [class.used]="isLetterUsed(letter)"
-            [class.wrong]="isLetterWrong(letter)"
-            (click)="escolherLetra(letter)"
-            [disabled]="aguardando() || isLetterUsed(letter) || guessing()">
-            {{ letter }}
-          </button>
-        }
-      </div>
-      @if (estadoSala()!.letrasErradas.length > 0) {
-        <p class="used-list">Letras erradas: {{ estadoSala()!.letrasErradas.join(', ') }}</p>
+    <div class="alphabet" [class.readonly-alphabet]="!podeInteragirComAlfabeto()">
+      @for (letter of alphabet; track letter) {
+        <button
+          class="letter"
+          [class.used]="isLetterUsed(letter)"
+          [class.wrong]="isLetterWrong(letter)"
+          (click)="escolherLetra(letter)"
+          [disabled]="!podeInteragirComAlfabeto() || aguardando() || isLetterUsed(letter)">
+          {{ letter }}
+        </button>
       }
-    } @else if (!ehEspectador()) {
+    </div>
+
+    @if (estadoSala()!.letrasErradas.length > 0) {
+      <p class="used-list">Letras erradas: {{ estadoSala()!.letrasErradas.join(', ') }}</p>
+    }
+
+    @if (!ehEspectador() && !ehMinhavez()) {
       <div class="waiting-overlay">
         @if (chuteAbertoPorEquipe()) {
           <p>&#128161; {{ chuteAbertoPorEquipe() }} está tentando adivinhar...</p>
         } @else {
           <p>Acompanhe a Vez de {{ estadoSala()!.nomeEquipeAtual }}</p>
         }
-        @if (estadoSala()!.letrasErradas.length > 0) {
-          <p class="used-list">Letras erradas: {{ estadoSala()!.letrasErradas.join(', ') }}</p>
-        }
       </div>
-    } @else {
+    } @else if (ehEspectador()) {
       <!-- View espectador: letras erradas e indicador de chute em aberto -->
       @if (chuteAbertoPorEquipe()) {
         <div class="spectator-guess-indicator">
           &#128161; {{ chuteAbertoPorEquipe() }} está tentando adivinhar...
         </div>
-      }
-      @if (estadoSala()!.letrasErradas.length > 0) {
-        <p class="used-list">Letras erradas: {{ estadoSala()!.letrasErradas.join(', ') }}</p>
       }
     }
 

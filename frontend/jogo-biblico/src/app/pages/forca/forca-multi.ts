@@ -5,6 +5,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ForcaHubService } from '../../services/forca-hub.service';
 import { RoomShareService } from '../../services/room-share.service';
+import { ReportIssue } from '../../shared/report-issue/report-issue';
 import { EstadoSala, EquipeMulti } from '../../models/forca-multi.model';
 
 type MultiPhase = 'config' | 'conectando' | 'lobby' | 'transition' | 'playing' | 'result';
@@ -12,7 +13,7 @@ type ConfigMode = 'criar' | 'entrar' | 'assistir';
 
 @Component({
   selector: 'app-forca-multi',
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, ReportIssue],
   templateUrl: './forca-multi.html',
   styleUrl: './forca-multi.scss'
 })
@@ -306,6 +307,14 @@ export class ForcaMulti implements OnInit, OnDestroy {
 
   isLetterWrong(letra: string): boolean {
     return this.estadoSala()?.letrasErradas?.includes(letra) ?? false;
+  }
+
+  podeInteragirComAlfabeto(): boolean {
+    return !this.ehEspectador() && this.ehMinhavez() && !this.guessing();
+  }
+
+  chuteCompletoValeBonus(): boolean {
+    return (this.estadoSala()?.letrasUsadas?.length ?? 0) === 0;
   }
 
   voltarParaConfig(): void {

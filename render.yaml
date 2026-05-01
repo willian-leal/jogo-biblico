@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: jogo-biblico-backend
+    runtime: docker
+    rootDir: backend/JogoBiblicoBackend
+    plan: starter
+    autoDeploy: true
+    healthCheckPath: /health
+    disk:
+      name: jogo-biblico-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__DefaultConnection
+        value: Data Source=/var/data/jogo_biblico.db
+      - key: Jwt__Issuer
+        value: JogoBiblico
+      - key: Jwt__Audience
+        value: JogoBiblicoUsers
+      - key: Jwt__Secret
+        sync: false
+      - key: Admin__Name
+        value: Administrador
+      - key: Admin__Email
+        sync: false
+      - key: Admin__Password
+        sync: false

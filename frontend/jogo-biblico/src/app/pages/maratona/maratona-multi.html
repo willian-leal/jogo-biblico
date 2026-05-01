@@ -1,0 +1,410 @@
+@if (phase() === 'config') {
+  <div class="container config">
+    <a routerLink="/" class="config-back">← Voltar ao início</a>
+    <p class="subtitle">Configuração</p>
+    <h1>Maratona Personalizada</h1>
+    <div class="config-ornament" aria-hidden="true"><span></span><strong>*</strong><span></span></div>
+
+    <div class="mode-tabs">
+      <button [class.active]="configMode() === 'criar'" (click)="configMode.set('criar')">Criar</button>
+      <button [class.active]="configMode() === 'entrar'" (click)="configMode.set('entrar')">Entrar</button>
+      <button [class.active]="configMode() === 'assistir'" (click)="configMode.set('assistir')">Assistir</button>
+    </div>
+
+    @if (configMode() === 'criar') {
+      <div class="form-group">
+        <label>Nome da sua equipe</label>
+        <input [(ngModel)]="nomeEquipe" placeholder="Ex: Leao" />
+      </div>
+
+      <div class="modos-section">
+        <p class="modos-label">Modos que farão parte da Maratona</p>
+        @for (modo of modosDisponiveis; track modo.tipo) {
+          <div class="modo-item" [class.selected]="modo.selecionado">
+            <label class="modo-toggle">
+              <input type="checkbox" [(ngModel)]="modo.selecionado" />
+              <span class="modo-icone">{{ modo.icone }}</span>
+              <span class="modo-nome">{{ modo.label }}</span>
+            </label>
+            @if (modo.selecionado) {
+              <div class="modo-config">
+                <select [(ngModel)]="modo.quantidade">
+                  <option [ngValue]="3">3 por equipe</option>
+                  <option [ngValue]="5">5 por equipe</option>
+                  <option [ngValue]="10">10 por equipe</option>
+                </select>
+                <select [(ngModel)]="modo.dificuldade">
+                  <option value="">Todas dificuldades</option>
+                  <option value="facil">Facil</option>
+                  <option value="medio">Medio</option>
+                  <option value="dificil">Dificil</option>
+                </select>
+                <select [(ngModel)]="modo.testamento">
+                  <option value="">Todos testamentos</option>
+                  <option value="AT">Antigo Testamento</option>
+                  <option value="NT">Novo Testamento</option>
+                </select>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      @if (modosOrdenados.length > 0) {
+        <div class="playlist-preview">
+          <p class="playlist-label">Ordem da Maratona</p>
+          @for (modo of modosOrdenados; track modo.tipo; let i = $index) {
+            <div class="playlist-item">
+              <span class="playlist-name">{{ i + 1 }}. {{ modo.icone }} {{ modo.label }}</span>
+              <div class="playlist-actions">
+                <button
+                  type="button"
+                  class="order-button"
+                  title="Subir modo"
+                  aria-label="Subir {{ modo.label }}"
+                  (click)="moverModo(modo.tipo, -1)"
+                  [disabled]="!podeSubirModo(modo.tipo)">
+                  &uarr;
+                </button>
+                <button
+                  type="button"
+                  class="order-button"
+                  title="Descer modo"
+                  aria-label="Descer {{ modo.label }}"
+                  (click)="moverModo(modo.tipo, 1)"
+                  [disabled]="!podeDescerModo(modo.tipo)">
+                  &darr;
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    } @else {
+      <div class="form-group">
+        <label>Codigo da sala</label>
+        <input [(ngModel)]="codigoEntrada" placeholder="Ex: AB12CD" style="text-transform:uppercase" />
+      </div>
+      @if (configMode() === 'entrar') {
+        <div class="form-group">
+          <label>Nome da sua equipe</label>
+          <input [(ngModel)]="nomeEquipe" placeholder="Ex: Profetas" />
+        </div>
+      }
+    }
+
+    @if (erro()) { <div class="erro">{{ erro() }}</div> }
+
+    <div class="actions">
+      @if (configMode() === 'criar') {
+        <button class="btn-primary" (click)="criarSala()" [disabled]="modosOrdenados.length === 0">Criar Sala</button>
+      } @else if (configMode() === 'entrar') {
+        <button class="btn-primary" (click)="entrarNaSala()">Entrar</button>
+      } @else {
+        <button class="btn-primary" (click)="entrarComoEspectador()">Assistir</button>
+      }
+    </div>
+  </div>
+}
+
+@if (connectionMessage()) {
+  <div class="connection-banner">{{ connectionMessage() }}</div>
+}
+
+@if (phase() === 'conectando') {
+  <div class="container center"><p class="loading-text">Conectando...</p></div>
+}
+
+@if (phase() === 'lobby') {
+  <div class="container lobby">
+    <div class="codigo-box">
+      <p class="codigo-label">Codigo da sala</p>
+      <h1 class="codigo">{{ codigoSala() }}</h1>
+    </div>
+
+    @if (!ehEspectador() && qrCodeUrl()) {
+      <div class="share-panel">
+        <img [src]="qrCodeUrl()" alt="QR Code" />
+        <div class="share-actions">
+          <button class="btn-secondary" (click)="copiarCodigo()">Copiar codigo</button>
+          <button class="btn-secondary" (click)="copiarLink('entrar')">Copiar link de equipe</button>
+          <button class="btn-secondary" (click)="copiarLink('assistir')">Copiar link de espectador</button>
+        </div>
+        @if (shareFeedback()) { <p class="share-feedback">{{ shareFeedback() }}</p> }
+      </div>
+    }
+
+    <div class="equipes-lobby">
+      <p class="equipes-label">Equipes na sala</p>
+      @for (equipe of estadoSala()?.equipes; track equipe.nome) {
+        <div class="equipe-item" [class.minha]="equipe.nome === minhaEquipe()">
+          {{ equipe.nome }}
+          @if (equipe.nome === minhaEquipe()) { <span class="tag-voce">voce</span> }
+        </div>
+      }
+    </div>
+
+    <div class="playlist-preview">
+      <p class="playlist-label">Modos da Maratona</p>
+      @for (modo of estadoSala()?.modos ?? []; track modo.tipo; let i = $index) {
+        <span class="playlist-item">{{ i + 1 }}. {{ nomeModo(modo.tipo) }} ({{ modo.quantidadePorEquipe }} por equipe)</span>
+      }
+    </div>
+
+    @if (erro()) { <div class="erro">{{ erro() }}</div> }
+
+    @if (ehEspectador()) {
+      <p class="hint">Modo espectador. Aguardando o anfitriao iniciar...</p>
+    } @else if (ehAnfitriao()) {
+      <div class="actions">
+        <button class="btn-primary" (click)="iniciarMaratona()" [disabled]="(estadoSala()?.equipes?.length ?? 0) < 2">
+          Iniciar Maratona
+        </button>
+        <button class="btn-secondary" (click)="voltarParaConfig()">Cancelar</button>
+      </div>
+      @if ((estadoSala()?.equipes?.length ?? 0) < 2) {
+        <p class="hint">Aguardando mais equipes...</p>
+      }
+    } @else {
+      <p class="hint">Aguardando o anfitriao iniciar...</p>
+      <button class="btn-secondary" (click)="voltarParaConfig()">Sair da sala</button>
+    }
+  </div>
+}
+
+@if (phase() === 'transicao-modo' && transicaoModo()) {
+  <div class="container transicao-modo">
+    <h1>Modo Encerrado!</h1>
+
+    <div class="scoreboard-completo">
+      @for (equipe of transicaoModo()!.ranking; track equipe.nome; let i = $index) {
+        <div class="rank-item" [class.first]="i === 0">
+          <span>{{ i + 1 }}º</span>
+          <strong>{{ equipe.nome }}</strong>
+          <em>{{ equipe.pontos }} pts</em>
+        </div>
+      }
+    </div>
+
+    <div class="proximo-modo">
+      <p>Proximo modo:</p>
+      <h2>{{ nomeModo(transicaoModo()!.proximoModo) }}</h2>
+      <p class="modo-progresso">{{ transicaoModo()!.indiceModosAtual }} de {{ transicaoModo()!.totalModos }} modos</p>
+    </div>
+
+    @if (ehAnfitriao()) {
+      <button class="btn-primary btn-grande" (click)="iniciarProximoModo()">Iniciar Proximo Modo</button>
+    } @else {
+      <p class="hint">Aguardando o anfitriao iniciar o proximo modo...</p>
+    }
+  </div>
+}
+
+@if (phase() === 'transicao' && estadoSala()) {
+  <div class="container transicao">
+    <div class="modo-badge">{{ nomeModo(estadoSala()!.modoAtual) }}</div>
+
+    <div class="scoreboard">
+      @for (equipe of estadoSala()!.equipes; track equipe.nome) {
+        <div class="score-card" [class.active]="equipe.nome === estadoSala()!.nomeEquipeAtual">
+          <span>{{ equipe.nome }}</span>
+          <strong>{{ equipe.pontos }}</strong>
+        </div>
+      }
+    </div>
+
+    <div class="transition-body">
+      <p class="transition-label">Vez de</p>
+      <h1>{{ estadoSala()!.nomeEquipeAtual }}</h1>
+      <p class="transition-hint">
+        {{ estadoSala()!.indicePerguntaAtual + 1 }} / {{ estadoSala()!.totalPerguntasDoModo }}
+      </p>
+
+      @if (ehEspectador()) {
+        <p class="waiting-text">Acompanhando como espectador</p>
+      } @else if (ehMinhavez()) {
+        <button class="btn-primary btn-ready" (click)="marcarPronto()" [disabled]="aguardando()">
+          {{ aguardando() ? 'Aguardando...' : 'Pronto!' }}
+        </button>
+      } @else {
+        <p class="waiting-text">Aguardando {{ estadoSala()!.nomeEquipeAtual }} ficar pronta...</p>
+        @if (ehAnfitriao()) {
+          <button class="btn-secondary" (click)="forcarAvanco()">Forcar avanco</button>
+        }
+      }
+    </div>
+  </div>
+}
+
+@if (phase() === 'jogando' && estadoSala()) {
+  <div class="container playing" [class.tv-mode]="ehEspectador()">
+
+    <div class="modo-badge">{{ nomeModo(estadoSala()!.modoAtual) }}</div>
+
+    <div class="scoreboard">
+      @for (equipe of estadoSala()!.equipes; track equipe.nome) {
+        <div class="score-card" [class.active]="equipe.nome === estadoSala()!.nomeEquipeAtual">
+          <span>{{ equipe.nome }}</span>
+          <strong>{{ equipe.pontos }}</strong>
+        </div>
+      }
+    </div>
+
+    <div class="turn-header">
+      <div>
+        <span class="progress">{{ estadoSala()!.indicePerguntaAtual + 1 }} / {{ estadoSala()!.totalPerguntasDoModo }}</span>
+        @if (ehMinhavez()) { <h2>Sua vez!</h2> }
+        @else { <h2>Vez de {{ estadoSala()!.nomeEquipeAtual }}</h2> }
+      </div>
+
+      @if (perguntaDaVez() && !resultadoResposta() || personagemMimica() && !resultadoResposta()) {
+        <div class="timer-group">
+          <div class="timer" [class.urgent]="timerSeconds() <= 8">{{ timerSeconds() }}s</div>
+          @if (ehMinhavez() && modoAtual() !== 'forca' && modoAtual() !== 'quemsoueu') {
+            <button class="btn-more-time" (click)="adicionarTempo()" [disabled]="aguardando()">+10s (-1pt)</button>
+          }
+        </div>
+      }
+    </div>
+
+    @if (perguntaDaVez() && !resultadoResposta()) {
+      <div class="timer-bar">
+        <div class="timer-fill" [style.width.%]="timerPercent()" [class.urgent]="timerSeconds() <= 8"></div>
+      </div>
+
+      <div class="question-card">
+        <div class="report-row">
+          <app-report-issue
+            modo="maratona"
+            [perguntaId]="perguntaDaVez()!.id"
+            [contexto]="nomeModo(estadoSala()!.modoAtual) + ': ' + perguntaDaVez()!.pergunta" />
+        </div>
+        <div class="difficulty badge-{{ perguntaDaVez()!.dificuldade }}">{{ perguntaDaVez()!.dificuldade }}</div>
+        <p class="question-text">{{ perguntaDaVez()!.pergunta }}</p>
+        @if (perguntaDaVez()!.referencia) { <p class="reference">{{ perguntaDaVez()!.referencia }}</p> }
+        @if (ehMinhavez() && modoAtual() === 'quiz') {
+          <p class="score-preview">Valendo ate {{ scorePreview() }} ponto{{ scorePreview() === 1 ? '' : 's' }}</p>
+        }
+      </div>
+
+      <div class="alternatives">
+        @for (alt of perguntaDaVez()!.alternativas; track alt) {
+          <button class="alternative" [class.readonly]="!ehMinhavez()"
+            (click)="responder(alt)" [disabled]="aguardando() || !ehMinhavez()">
+            {{ alt }}
+          </button>
+        }
+      </div>
+    }
+
+    @if (forcaEstado() && !resultadoResposta()) {
+      <div class="forca-area">
+        <div class="report-row">
+          <app-report-issue
+            modo="maratona-forca"
+            [contexto]="forcaEstado()!.dica" />
+        </div>
+        <p class="forca-dica">{{ forcaEstado()!.dica }}</p>
+        <div class="forca-mascara">
+          @for (letra of forcaEstado()!.mascara; track $index) {
+            <span class="mascara-letra" [class.espaco]="letra === ' '">{{ letra }}</span>
+          }
+        </div>
+
+        @if (forcaEstado()!.letrasErradas.length > 0) {
+          <p class="letras-erradas">Erradas: {{ forcaEstado()!.letrasErradas.join(', ') }}</p>
+        }
+
+        <div class="alphabet-grid" [class.readonly-alphabet]="!podeInteragirComForca()">
+          @for (letra of alfabeto; track letra) {
+            <button class="letra-btn"
+              [class.usada]="letraUsada(letra)"
+              [class.errada]="letraErrada(letra)"
+              (click)="escolherLetra(letra)"
+              [disabled]="!podeInteragirComForca() || aguardando() || letraUsada(letra)">
+              {{ letra }}
+            </button>
+          }
+        </div>
+
+        @if (ehMinhavez() && !chuteAberto()) {
+          <button class="btn-secondary btn-chute" (click)="abrirChute()" [disabled]="aguardando()">
+            Adivinhar palavra completa {{ chuteCompletoValeBonus() ? '(+5pts)' : '(+0pt)' }}
+          </button>
+        }
+
+        @if (ehMinhavez() && chuteAberto()) {
+          <div class="chute-area">
+            <input [(ngModel)]="chuteTentativa" placeholder="Digite o nome completo..." (keyup.enter)="enviarChute()" />
+            <div class="chute-actions">
+              <button class="btn-primary" (click)="enviarChute()" [disabled]="aguardando() || !chuteTentativa.trim()">Confirmar</button>
+              <button class="btn-secondary" (click)="cancelarChute()" [disabled]="aguardando()">Cancelar</button>
+            </div>
+          </div>
+        }
+
+        @if (!ehMinhavez()) {
+          <p class="waiting-text">{{ estadoSala()!.nomeEquipeAtual }} esta tentando...</p>
+        }
+      </div>
+    }
+
+    @if (modoAtual() === 'quemsoueu' && !resultadoResposta()) {
+      <div class="mimica-area">
+        @if (personagemMimica()) {
+          <div class="personagem-revelar">
+            <p class="personagem-label">Imite este personagem para sua equipe:</p>
+            <h1 class="personagem-nome">{{ personagemMimica() }}</h1>
+          </div>
+          <div class="timer-bar">
+            <div class="timer-fill" [style.width.%]="timerPercent()" [class.urgent]="timerSeconds() <= 10"></div>
+          </div>
+          <div class="mimica-actions">
+            <button class="btn-success" (click)="acertouMimica()" [disabled]="aguardando()">✓ Acertou!</button>
+            <button class="btn-danger" (click)="errouMimica()" [disabled]="aguardando()">✗ Errou</button>
+          </div>
+        } @else {
+          <div class="mimica-espera">
+            <p>{{ estadoSala()!.nomeEquipeAtual }} esta mimicando um personagem...</p>
+            <div class="timer-bar">
+              <div class="timer-fill" [style.width.%]="timerPercent()" [class.urgent]="timerSeconds() <= 10"></div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (feedback()) {
+      <div class="feedback" [class.feedback-ok]="feedback()!.type === 'ok'" [class.feedback-err]="feedback()!.type === 'err'">
+        {{ feedback()!.message }}
+      </div>
+    }
+  </div>
+}
+
+@if (phase() === 'resultado') {
+  <div class="container result">
+    <h1>Maratona Encerrada!</h1>
+
+    <div class="winner">
+      @if (ranking()[0]) {
+        <p>Campeao: <strong>{{ ranking()[0].nome }}</strong></p>
+      }
+    </div>
+
+    <div class="ranking">
+      @for (equipe of ranking(); track equipe.nome; let i = $index) {
+        <div class="ranking-item" [class.first]="i === 0">
+          <span>{{ i + 1 }}º</span>
+          <strong>{{ equipe.nome }}</strong>
+          <em>{{ equipe.pontos }} ponto{{ equipe.pontos === 1 ? '' : 's' }}</em>
+        </div>
+      }
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" (click)="jogarNovamente()">Jogar Novamente</button>
+      <a routerLink="/" class="btn-secondary">Inicio</a>
+    </div>
+  </div>
+}

@@ -1,0 +1,167 @@
+.admin-page {
+  width: min(1040px, calc(100vw - 32px));
+  margin: 0 auto;
+  padding: 32px 0 48px;
+}
+
+.admin-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1.5rem;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.back-link {
+  color: var(--jw-muted);
+  text-decoration: none;
+}
+
+.eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--jw-accent);
+  font-family: var(--jw-title);
+  font-size: 0.72rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  font-family: var(--jw-title);
+  font-size: clamp(2rem, 5vw, 3.25rem);
+}
+
+.login-card,
+.item {
+  background: var(--jw-card);
+  border: 1px solid var(--jw-line);
+  border-radius: 10px;
+  box-shadow: var(--jw-shadow);
+}
+
+.login-card {
+  width: min(420px, 100%);
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+label {
+  display: grid;
+  gap: 0.45rem;
+  color: var(--jw-muted);
+  font-family: var(--jw-title);
+  font-size: 0.76rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid rgba(192, 80, 30, 0.22);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--jw-ink);
+  font-family: var(--jw-body);
+  font-size: 1rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.tabs button {
+  border: 1px solid var(--jw-line);
+  border-radius: 8px;
+  background: #fff;
+  padding: 0.65rem 0.9rem;
+  color: var(--jw-muted);
+  font-family: var(--jw-title);
+}
+
+.tabs button.active {
+  border-color: var(--jw-accent);
+  color: var(--jw-accent);
+  background: var(--jw-card-soft);
+}
+
+.tabs span {
+  color: var(--jw-accent);
+}
+
+.refresh {
+  margin-left: auto;
+}
+
+.list {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.item {
+  padding: 1rem;
+}
+
+.item-top {
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  gap: 1rem;
+  align-items: start;
+}
+
+.item strong {
+  font-family: var(--jw-title);
+  color: var(--jw-ink);
+}
+
+.meta {
+  color: var(--jw-muted);
+  font-size: 0.85rem;
+}
+
+.detail {
+  color: var(--jw-accent-deep);
+  font-style: italic;
+}
+
+.answers {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.75rem 0;
+  color: var(--jw-muted);
+}
+
+.empty,
+.error {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+}
+
+.empty {
+  color: var(--jw-muted);
+}
+
+.error {
+  background: var(--jw-bad-bg);
+  color: var(--jw-bad);
+}
+
+@media (max-width: 720px) {
+  .admin-header,
+  .item-top {
+    grid-template-columns: 1fr;
+  }
+
+  .refresh {
+    margin-left: 0;
+  }
+}

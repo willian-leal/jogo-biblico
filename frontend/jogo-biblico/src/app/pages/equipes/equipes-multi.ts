@@ -5,6 +5,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { EquipesHubService } from '../../services/equipes-hub.service';
 import { RoomShareService } from '../../services/room-share.service';
+import { ReportIssue } from '../../shared/report-issue/report-issue';
 import {
   EquipeMultiEquipes,
   EstadoSalaEquipes,
@@ -17,7 +18,7 @@ type ConfigMode = 'criar' | 'entrar' | 'assistir';
 
 @Component({
   selector: 'app-equipes-multi',
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, ReportIssue],
   templateUrl: './equipes-multi.html',
   styleUrl: './equipes-multi.scss'
 })
@@ -121,8 +122,7 @@ export class EquipesMulti implements OnInit, OnDestroy {
         this.timerSeconds.set(30);
         this.submittedTurn = false;
         this.phase.set('playing');
-        if (this.ehMinhavez()) this.startTimer();
-        else this.stopTimer();
+        this.startTimer();
       }),
 
       this.hub.aguardandoResposta$.subscribe(e => {
@@ -138,7 +138,7 @@ export class EquipesMulti implements OnInit, OnDestroy {
       this.hub.tempoAdicionado$.subscribe(e => {
         if (e.nomeEquipe === this.estadoSala()?.nomeEquipeAtual) {
           this.addTimeUses.set(e.addTimeUsesTurno);
-          if (this.ehMinhavez()) this.timerSeconds.update(value => value + 10);
+          this.timerSeconds.update(value => value + 10);
         }
       }),
 
@@ -339,7 +339,7 @@ export class EquipesMulti implements OnInit, OnDestroy {
     this.timerId = window.setInterval(() => {
       const next = this.timerSeconds() - 1;
       this.timerSeconds.set(Math.max(0, next));
-      if (next <= 0) {
+      if (next <= 0 && this.ehMinhavez()) {
         this.responder('');
       }
     }, 1000);

@@ -4,35 +4,34 @@
 
 @if (phase === 'config') {
   <div class="container config">
+    <a routerLink="/" class="config-back">← Voltar ao início</a>
+    <p class="subtitle">Configuração</p>
     <h1>Cruzadinha</h1>
-    <p class="subtitle">Configure a grade de dicas biblicas</p>
+    <div class="config-ornament" aria-hidden="true"><span></span><strong>*</strong><span></span></div>
 
     <div class="form-group">
       <label>Dificuldade</label>
-      <select [(ngModel)]="dificuldade">
-        <option value="">Todas</option>
-        <option value="facil">Facil</option>
-        <option value="medio">Medio</option>
-        <option value="dificil">Dificil</option>
-      </select>
+      <div class="segmented-control cols-4">
+        <button type="button" [class.active]="dificuldade === 'facil'" (click)="dificuldade = 'facil'">Fácil</button>
+        <button type="button" [class.active]="dificuldade === 'medio'" (click)="dificuldade = 'medio'">Médio</button>
+        <button type="button" [class.active]="dificuldade === 'dificil'" (click)="dificuldade = 'dificil'">Difícil</button>
+        <button type="button" [class.active]="dificuldade === ''" (click)="dificuldade = ''">Todos</button>
+      </div>
     </div>
 
     <div class="form-group">
       <label>Testamento</label>
-      <select [(ngModel)]="testamento">
-        <option value="">Todos</option>
-        <option value="AT">Antigo Testamento</option>
-        <option value="NT">Novo Testamento</option>
-      </select>
+      <div class="segmented-control cols-3">
+        <button type="button" [class.active]="testamento === 'AT'" (click)="testamento = 'AT'">Antigo</button>
+        <button type="button" [class.active]="testamento === 'NT'" (click)="testamento = 'NT'">Novo</button>
+        <button type="button" [class.active]="testamento === ''" (click)="testamento = ''">Todos</button>
+      </div>
     </div>
 
     <div class="form-group">
-      <label>Quantidade de perguntas</label>
-      <select [(ngModel)]="quantidade">
-        <option [ngValue]="4">4</option>
-        <option [ngValue]="5">5</option>
-        <option [ngValue]="6">6</option>
-      </select>
+      <label class="range-label-row">Perguntas <span class="range-value">{{ quantidade }}</span></label>
+      <input class="range-control" type="range" min="4" max="6" step="1" [(ngModel)]="quantidade" />
+      <div class="range-meta"><span>4</span><span>6</span></div>
     </div>
 
     @if (error) {
@@ -40,9 +39,8 @@
     }
 
     <div class="actions">
-      <a routerLink="/" class="btn-secondary">&#8592; Inicio</a>
       <button class="btn-primary" (click)="startGame()" [disabled]="loading">
-        {{ loading ? 'Carregando...' : 'Iniciar Cruzadinha' }}
+        {{ loading ? 'Carregando...' : 'Iniciar' }}
       </button>
     </div>
   </div>

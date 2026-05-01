@@ -51,7 +51,13 @@ export class Quiz implements OnDestroy {
 
   readonly perguntaAtual = computed(() => this.perguntas[this.indiceAtual()] ?? null);
   readonly timerPercent = computed(() => (this.timerSegundos() / 30) * 100);
-  readonly pontuacao = computed(() => this.registros.filter(r => r.correta).length);
+  pontuacao(): number {
+    return this.registros.filter(r => r.correta).length;
+  }
+
+  pontos(): number {
+    return this.pontuacao() * 150;
+  }
 
   constructor(private perguntaService: PerguntaService) {}
 
@@ -110,6 +116,20 @@ export class Quiz implements OnDestroy {
     return '';
   }
 
+  letraAlternativa(index: number): string {
+    return String.fromCharCode(65 + index);
+  }
+
+  proximaPergunta() {
+    if (this.indiceAtual() < this.perguntas.length - 1) {
+      this.indiceAtual.update(i => i + 1);
+      this.iniciarTimer();
+    } else {
+      clearInterval(this.timerInterval);
+      this.fase = 'resultado';
+    }
+  }
+
   private iniciarTimer() {
     this.timerSegundos.set(30);
     this.respostaSelecionada = '';
@@ -140,20 +160,9 @@ export class Quiz implements OnDestroy {
           respostaCorreta: resultado.respostaCorreta,
           correta: resultado.correta
         });
-        setTimeout(() => this.proximaPergunta(), 1800);
       },
       error: () => this.proximaPergunta()
     });
-  }
-
-  private proximaPergunta() {
-    if (this.indiceAtual() < this.perguntas.length - 1) {
-      this.indiceAtual.update(i => i + 1);
-      this.iniciarTimer();
-    } else {
-      clearInterval(this.timerInterval);
-      this.fase = 'resultado';
-    }
   }
 
   ngOnDestroy() {

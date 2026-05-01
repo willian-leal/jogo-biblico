@@ -4,16 +4,18 @@
 
 @if (phase === 'config') {
   <div class="container config">
+    <a routerLink="/" class="config-back">← Voltar ao início</a>
+    <p class="subtitle">Configuração</p>
     <h1>Forca</h1>
-    <p class="subtitle">Configure a disputa por personagens</p>
+    <div class="config-ornament" aria-hidden="true"><span></span><strong>*</strong><span></span></div>
 
     <div class="form-group">
       <label>Quantidade de equipes</label>
-      <select [(ngModel)]="teamCount" (ngModelChange)="updateTeamCount()">
-        <option [ngValue]="2">2</option>
-        <option [ngValue]="3">3</option>
-        <option [ngValue]="4">4</option>
-      </select>
+      <div class="segmented-control cols-3">
+        <button type="button" [class.active]="teamCount === 2" (click)="teamCount = 2; updateTeamCount()">2</button>
+        <button type="button" [class.active]="teamCount === 3" (click)="teamCount = 3; updateTeamCount()">3</button>
+        <button type="button" [class.active]="teamCount === 4" (click)="teamCount = 4; updateTeamCount()">4</button>
+      </div>
     </div>
 
     <div class="team-grid">
@@ -27,34 +29,31 @@
 
     <div class="form-group">
       <label>Dificuldade</label>
-      <select [(ngModel)]="dificuldade">
-        <option value="">Todas</option>
-        <option value="facil">Facil</option>
-        <option value="medio">Medio</option>
-        <option value="dificil">Dificil</option>
-      </select>
+      <div class="segmented-control cols-4">
+        <button type="button" [class.active]="dificuldade === 'facil'" (click)="dificuldade = 'facil'">Fácil</button>
+        <button type="button" [class.active]="dificuldade === 'medio'" (click)="dificuldade = 'medio'">Médio</button>
+        <button type="button" [class.active]="dificuldade === 'dificil'" (click)="dificuldade = 'dificil'">Difícil</button>
+        <button type="button" [class.active]="dificuldade === ''" (click)="dificuldade = ''">Todos</button>
+      </div>
     </div>
 
     <div class="form-group">
       <label>Testamento</label>
-      <select [(ngModel)]="testamento">
-        <option value="">Todos</option>
-        <option value="AT">Antigo Testamento</option>
-        <option value="NT">Novo Testamento</option>
-      </select>
+      <div class="segmented-control cols-3">
+        <button type="button" [class.active]="testamento === 'AT'" (click)="testamento = 'AT'">Antigo</button>
+        <button type="button" [class.active]="testamento === 'NT'" (click)="testamento = 'NT'">Novo</button>
+        <button type="button" [class.active]="testamento === ''" (click)="testamento = ''">Todos</button>
+      </div>
     </div>
 
     <div class="form-group">
-      <label>Rodadas</label>
-      <select [(ngModel)]="questionsPerGame">
-        <option [ngValue]="3">3</option>
-        <option [ngValue]="5">5</option>
-        <option [ngValue]="10">10</option>
-      </select>
+      <label class="range-label-row">Rodadas <span class="range-value">{{ questionsPerGame }}</span></label>
+      <input class="range-control" type="range" min="3" max="10" step="1" [(ngModel)]="questionsPerGame" />
+      <div class="range-meta"><span>3</span><span>10</span></div>
     </div>
 
     <div class="scoring-info">
-      <p>Letra correta +1pt. Completar por letras +3pts. Chute correto +5pts. Chute errado passa a vez.</p>
+      <p>Letra correta +1pt. Completar por letras +3pts. Chute completo correto +5pts apenas antes de qualquer letra. Chute errado passa a vez.</p>
     </div>
 
     @if (error) {
@@ -62,7 +61,6 @@
     }
 
     <div class="actions">
-      <a routerLink="/" class="btn-secondary">&#8592; Inicio</a>
       <a routerLink="/forca/multi" class="btn-secondary">&#127760; Em Rede</a>
       <button class="btn-primary" (click)="startGame()" [disabled]="loading">
         {{ loading ? 'Carregando...' : 'Iniciar Partida' }}
@@ -109,7 +107,9 @@
         <span class="progress">{{ currentIndex() + 1 }} / {{ questions.length }}</span>
         <h1>Vez de {{ currentTeam().name }}</h1>
       </div>
-      <button class="btn-guess" (click)="openGuess()" [disabled]="waitingResponse">Chutar personagem</button>
+      <button class="btn-guess" (click)="openGuess()" [disabled]="waitingResponse">
+        Chutar personagem {{ usedLetters.length === 0 ? '(+5pts)' : '(+0pt)' }}
+      </button>
     </div>
 
     <div class="question-card">

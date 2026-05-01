@@ -275,3 +275,245 @@ h1 {
   from { transform: scale(1); }
   to { transform: scale(1.05); }
 }
+
+// --- Prototype gameplay skin ---
+.jogando {
+  max-width: 674px;
+  padding: 2rem 0;
+}
+
+.jogando .header {
+  margin-bottom: 1rem;
+}
+
+.round-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.round-meta .progresso {
+  color: var(--jw-muted);
+  font-family: var(--jw-body);
+  font-size: 1rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.round-meta .progresso strong {
+  color: var(--jw-accent);
+  font-weight: 400;
+}
+
+.round-meta .dificuldade {
+  margin: 0;
+  padding: 0.35rem 0.95rem;
+  border-radius: 999px;
+  font-size: 0.84rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+}
+
+.timer-grupo {
+  gap: 0.75rem;
+}
+
+.score-label {
+  color: var(--jw-accent);
+  font-family: var(--jw-title);
+  font-size: 0.86rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.score-label strong {
+  font-size: 1.2rem;
+  font-weight: 400;
+}
+
+.jogando .timer {
+  min-width: auto;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  color: var(--jw-accent);
+  font-family: var(--jw-body);
+  font-size: 0.96rem;
+  font-weight: 400;
+  text-align: right;
+}
+
+.jogando .timer-bar {
+  height: 4px;
+  background: var(--jw-ink);
+  border-radius: 999px;
+  margin-bottom: 3.25rem;
+}
+
+.jogando .timer-fill {
+  background: var(--jw-accent);
+  border-radius: 999px;
+}
+
+.jogando .card-pergunta {
+  background: var(--jw-card);
+  border: 1px solid rgba(28, 24, 20, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(28, 24, 20, 0.06);
+  padding: 2rem 1.75rem;
+  margin-bottom: 1.45rem;
+}
+
+.jogando .pergunta-texto {
+  color: var(--jw-ink);
+  font-family: var(--jw-body);
+  font-size: clamp(1.25rem, 3.5vw, 1.58rem);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.alternativas {
+  gap: 0.9rem;
+}
+
+.alternativa {
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: 2.1rem 1fr;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.25rem;
+  background: var(--jw-card);
+  border: 1px solid transparent;
+  border-radius: 9px;
+  color: var(--jw-ink);
+  font-family: var(--jw-body);
+  font-size: 1.08rem;
+  box-shadow: none;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.alternativa:hover:not(:disabled) {
+  background: #fef9f4;
+  border-color: rgba(232, 98, 42, 0.24);
+}
+
+.alternativa.selecionada,
+.alternativa.correta {
+  background: #e7f4ef;
+  border-color: #2f7d58;
+  color: #276749;
+}
+
+.alternativa.errada {
+  background: #fde8e8;
+  border-color: rgba(197, 48, 48, 0.42);
+  color: var(--jw-bad);
+}
+
+.alt-letter {
+  color: var(--jw-accent);
+  font-family: var(--jw-title);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+}
+
+.alternativa.correta .alt-letter,
+.alternativa.selecionada .alt-letter {
+  color: #276749;
+}
+
+.alternativa.errada .alt-letter {
+  color: var(--jw-bad);
+}
+
+.alt-text {
+  min-width: 0;
+}
+
+.jogando .feedback {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 1.35rem;
+  padding: 0.95rem 1.2rem;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  text-align: left;
+  font-family: var(--jw-title);
+  font-weight: 400;
+  font-size: 0.98rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.jogando .feedback em {
+  color: var(--jw-accent);
+  font-family: var(--jw-body);
+  font-style: italic;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.jogando .feedback.feedback-ok {
+  background: #e7f4ef;
+  border-color: rgba(47, 125, 88, 0.28);
+  color: #276749;
+}
+
+.jogando .feedback.feedback-err {
+  background: #fde8e8;
+  border-color: rgba(197, 48, 48, 0.28);
+  color: var(--jw-bad);
+}
+
+.btn-next {
+  width: 100%;
+  min-height: 59px;
+  margin-top: 1rem;
+  border-radius: 9px;
+  font-size: 1.05rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 620px) {
+  .jogando {
+    padding: 1.2rem 0;
+  }
+
+  .jogando .header {
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .round-meta,
+  .timer-grupo {
+    flex-wrap: wrap;
+  }
+
+  .timer-grupo {
+    justify-content: flex-end;
+  }
+
+  .jogando .card-pergunta {
+    padding: 1.35rem;
+  }
+
+  .jogando .feedback {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 420px) {
+  .jogando .header {
+    flex-direction: column;
+  }
+
+  .timer-grupo {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

@@ -5,36 +5,34 @@
 <!-- TELA DE CONFIGURAÇÃO -->
 @if (fase === 'config') {
   <div class="container config">
-    <h1>&#127919; Quiz Bíblico</h1>
-    <p class="subtitle">Configure sua partida</p>
+    <a routerLink="/" class="config-back">← Voltar ao início</a>
+    <p class="subtitle">Configuração</p>
+    <h1>Quiz</h1>
+    <div class="config-ornament" aria-hidden="true"><span></span><strong>*</strong><span></span></div>
 
     <div class="form-group">
       <label>Dificuldade</label>
-      <select [(ngModel)]="dificuldade">
-        <option value="">Todas</option>
-        <option value="facil">Fácil</option>
-        <option value="medio">Médio</option>
-        <option value="dificil">Difícil</option>
-      </select>
+      <div class="segmented-control cols-4">
+        <button type="button" [class.active]="dificuldade === 'facil'" (click)="dificuldade = 'facil'">Fácil</button>
+        <button type="button" [class.active]="dificuldade === 'medio'" (click)="dificuldade = 'medio'">Médio</button>
+        <button type="button" [class.active]="dificuldade === 'dificil'" (click)="dificuldade = 'dificil'">Difícil</button>
+        <button type="button" [class.active]="dificuldade === ''" (click)="dificuldade = ''">Todos</button>
+      </div>
     </div>
 
     <div class="form-group">
       <label>Testamento</label>
-      <select [(ngModel)]="testamento">
-        <option value="">Todos</option>
-        <option value="AT">Antigo Testamento</option>
-        <option value="NT">Novo Testamento</option>
-      </select>
+      <div class="segmented-control cols-3">
+        <button type="button" [class.active]="testamento === 'AT'" (click)="testamento = 'AT'">Antigo</button>
+        <button type="button" [class.active]="testamento === 'NT'" (click)="testamento = 'NT'">Novo</button>
+        <button type="button" [class.active]="testamento === ''" (click)="testamento = ''">Todos</button>
+      </div>
     </div>
 
     <div class="form-group">
-      <label>Quantidade de perguntas</label>
-      <select [(ngModel)]="quantidade">
-        <option [value]="5">5</option>
-        <option [value]="10">10</option>
-        <option [value]="15">15</option>
-        <option [value]="20">20</option>
-      </select>
+      <label class="range-label-row">Perguntas <span class="range-value">{{ quantidade }}</span></label>
+      <input class="range-control" type="range" min="3" max="12" step="1" [(ngModel)]="quantidade" />
+      <div class="range-meta"><span>3</span><span>12</span></div>
     </div>
 
     @if (erro) {
@@ -42,9 +40,8 @@
     }
 
     <div class="actions">
-      <a routerLink="/" class="btn-secondary">&#8592; Início</a>
       <button class="btn-primary" (click)="iniciarQuiz()" [disabled]="carregando">
-        {{ carregando ? 'Carregando...' : 'Iniciar Quiz' }}
+        {{ carregando ? 'Carregando...' : 'Iniciar' }}
       </button>
     </div>
   </div>
@@ -54,8 +51,12 @@
 @if (fase === 'jogando' && perguntaAtual()) {
   <div class="container jogando">
     <div class="header">
-      <span class="progresso">{{ indiceAtual() + 1 }} / {{ perguntas.length }}</span>
+      <div class="round-meta">
+        <span class="progresso">{{ indiceAtual() + 1 }} / <strong>{{ perguntas.length }}</strong></span>
+        <span class="dificuldade badge-{{ perguntaAtual()!.dificuldade }}">{{ perguntaAtual()!.dificuldade }}</span>
+      </div>
       <div class="timer-grupo">
+        <span class="score-label">PTS <strong>{{ pontos() }}</strong></span>
         <div class="timer" [class.urgente]="timerSegundos() <= 8">
           {{ timerSegundos() }}s
         </div>
@@ -76,28 +77,32 @@
           [perguntaId]="perguntaAtual()!.id"
           [contexto]="perguntaAtual()!.pergunta" />
       </div>
-      <div class="dificuldade badge-{{ perguntaAtual()!.dificuldade }}">{{ perguntaAtual()!.dificuldade }}</div>
       <p class="pergunta-texto">{{ perguntaAtual()!.pergunta }}</p>
-      @if (perguntaAtual()!.referencia) {
-        <p class="referencia">{{ perguntaAtual()!.referencia }}</p>
-      }
     </div>
 
     <div class="alternativas">
-      @for (alt of perguntaAtual()!.alternativas; track alt) {
+      @for (alt of perguntaAtual()!.alternativas; track alt; let i = $index) {
         <button
           class="alternativa {{ getCorAlternativa(alt) }}"
           (click)="selecionarResposta(alt)"
           [disabled]="aguardandoFeedback">
-          {{ alt }}
+          <span class="alt-letter">{{ letraAlternativa(i) }}</span>
+          <span class="alt-text">{{ alt }}</span>
         </button>
       }
     </div>
 
     @if (feedback) {
       <div class="feedback" [class.feedback-ok]="feedback.correta" [class.feedback-err]="!feedback.correta">
-        {{ feedback.correta ? '&#10003; Correto!' : '&#10007; Errado — ' + feedback.respostaCorreta }}
+        <span>{{ feedback.correta ? '✓ Correto!' : 'X Era: ' + feedback.respostaCorreta }}</span>
+        @if (perguntaAtual()!.referencia) {
+          <em>{{ perguntaAtual()!.referencia }}</em>
+        }
       </div>
+
+      <button class="btn-primary btn-next" (click)="proximaPergunta()">
+        Próxima →
+      </button>
     }
   </div>
 }

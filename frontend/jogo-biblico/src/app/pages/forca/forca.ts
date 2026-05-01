@@ -179,7 +179,8 @@ export class Forca {
       next: result => {
         this.guessing = false;
         if (result.correta) {
-          this.finishRound(result.respostaCorreta, 'acertou no chute', 5);
+          const bonus = this.usedLetters.length === 0 ? 5 : 0;
+          this.finishRound(result.respostaCorreta, 'acertou no chute', bonus);
           return;
         }
 

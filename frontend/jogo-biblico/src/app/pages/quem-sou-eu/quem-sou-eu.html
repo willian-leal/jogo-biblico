@@ -4,16 +4,18 @@
 
 @if (phase === 'config') {
   <div class="container config">
-    <h1>&#127917; Quem Sou Eu?</h1>
-    <p class="subtitle">Configure a partida de mímica</p>
+    <a routerLink="/" class="config-back">← Voltar ao início</a>
+    <p class="subtitle">Configuração</p>
+    <h1>Quem Sou Eu?</h1>
+    <div class="config-ornament" aria-hidden="true"><span></span><strong>*</strong><span></span></div>
 
     <div class="form-group">
       <label>Quantidade de equipes</label>
-      <select [(ngModel)]="teamCount" (ngModelChange)="updateTeamCount()">
-        <option [ngValue]="2">2</option>
-        <option [ngValue]="3">3</option>
-        <option [ngValue]="4">4</option>
-      </select>
+      <div class="segmented-control cols-3">
+        <button type="button" [class.active]="teamCount === 2" (click)="teamCount = 2; updateTeamCount()">2</button>
+        <button type="button" [class.active]="teamCount === 3" (click)="teamCount = 3; updateTeamCount()">3</button>
+        <button type="button" [class.active]="teamCount === 4" (click)="teamCount = 4; updateTeamCount()">4</button>
+      </div>
     </div>
 
     <div class="team-grid">
@@ -27,22 +29,18 @@
 
     <div class="form-group">
       <label>Dificuldade</label>
-      <select [(ngModel)]="dificuldade">
-        <option value="">Todas</option>
-        <option value="facil">Fácil (90s por carta)</option>
-        <option value="medio">Médio (60s por carta)</option>
-        <option value="dificil">Difícil (45s por carta)</option>
-      </select>
+      <div class="segmented-control cols-4">
+        <button type="button" [class.active]="dificuldade === 'facil'" (click)="dificuldade = 'facil'">Fácil</button>
+        <button type="button" [class.active]="dificuldade === 'medio'" (click)="dificuldade = 'medio'">Médio</button>
+        <button type="button" [class.active]="dificuldade === 'dificil'" (click)="dificuldade = 'dificil'">Difícil</button>
+        <button type="button" [class.active]="dificuldade === ''" (click)="dificuldade = ''">Todos</button>
+      </div>
     </div>
 
     <div class="form-group">
-      <label>Cartas por equipe</label>
-      <select [(ngModel)]="cardsPerTeam">
-        <option [ngValue]="3">3</option>
-        <option [ngValue]="5">5</option>
-        <option [ngValue]="7">7</option>
-        <option [ngValue]="10">10</option>
-      </select>
+      <label class="range-label-row">Cartas por equipe <span class="range-value">{{ cardsPerTeam }}</span></label>
+      <input class="range-control" type="range" min="3" max="10" step="1" [(ngModel)]="cardsPerTeam" />
+      <div class="range-meta"><span>3</span><span>10</span></div>
     </div>
 
     <div class="scoring-info">
@@ -54,7 +52,6 @@
     }
 
     <div class="actions">
-      <a routerLink="/" class="btn-secondary">&#8592; Início</a>
       <button class="btn-primary" (click)="startGame()">Iniciar Partida</button>
     </div>
   </div>

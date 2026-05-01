@@ -1,0 +1,71 @@
+<div class="suggest-page">
+  <a routerLink="/" class="config-back">← Voltar ao início</a>
+  <p class="subtitle">Colaboração</p>
+  <h1>Sugerir Pergunta</h1>
+  <div class="config-ornament" aria-hidden="true"><span></span><strong>*</strong><span></span></div>
+
+  <form class="suggest-form" (ngSubmit)="submit()">
+    <div class="form-grid two">
+      <label>
+        Nome
+        <input name="nome" [(ngModel)]="form.nome" required />
+      </label>
+      <label>
+        Contato
+        <input name="contato" [(ngModel)]="form.contato" placeholder="Opcional" />
+      </label>
+    </div>
+
+    <label>
+      Pergunta
+      <textarea name="pergunta" [(ngModel)]="form.pergunta" rows="4" required></textarea>
+    </label>
+
+    <div class="form-grid two">
+      <label>Alternativa A <input name="alternativaA" [(ngModel)]="form.alternativaA" /></label>
+      <label>Alternativa B <input name="alternativaB" [(ngModel)]="form.alternativaB" /></label>
+      <label>Alternativa C <input name="alternativaC" [(ngModel)]="form.alternativaC" /></label>
+      <label>Alternativa D <input name="alternativaD" [(ngModel)]="form.alternativaD" /></label>
+    </div>
+
+    <label>
+      Resposta correta
+      <input name="respostaCorreta" [(ngModel)]="form.respostaCorreta" required />
+    </label>
+
+    <div class="form-grid three">
+      <label>
+        Referência
+        <input name="referencia" [(ngModel)]="form.referencia" placeholder="Ex: João 3:16" />
+      </label>
+      <label>
+        Dificuldade
+        <select name="dificuldade" [(ngModel)]="form.dificuldade">
+          <option value="facil">Fácil</option>
+          <option value="medio">Médio</option>
+          <option value="dificil">Difícil</option>
+        </select>
+      </label>
+      <label>
+        Testamento
+        <select name="testamento" [(ngModel)]="form.testamento">
+          <option value="">Não sei</option>
+          <option value="AT">Antigo</option>
+          <option value="NT">Novo</option>
+        </select>
+      </label>
+    </div>
+
+    <label>
+      Observação
+      <textarea name="observacao" [(ngModel)]="form.observacao" rows="3" placeholder="Opcional"></textarea>
+    </label>
+
+    @if (sent) { <p class="success">Sugestão enviada. Obrigado!</p> }
+    @if (error) { <p class="error">{{ error }}</p> }
+
+    <button class="btn-primary" type="submit" [disabled]="sending">
+      {{ sending ? 'Enviando...' : 'Enviar sugestão' }}
+    </button>
+  </form>
+</div>

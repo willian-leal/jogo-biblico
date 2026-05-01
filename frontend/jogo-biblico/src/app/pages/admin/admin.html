@@ -1,0 +1,94 @@
+<div class="admin-page">
+  <header class="admin-header">
+    <a routerLink="/" class="back-link">← Início</a>
+    <div>
+      <p class="eyebrow">Admin</p>
+      <h1>Painel de Revisão</h1>
+    </div>
+    @if (admin.loggedIn) {
+      <button class="btn-secondary" type="button" (click)="logout()">Sair</button>
+    }
+  </header>
+
+  @if (!admin.loggedIn) {
+    <form class="login-card" (ngSubmit)="login()">
+      <label>
+        Email
+        <input name="email" type="email" [(ngModel)]="email" />
+      </label>
+      <label>
+        Senha
+        <input name="password" type="password" [(ngModel)]="password" />
+      </label>
+      @if (loginError) { <p class="error">{{ loginError }}</p> }
+      <button class="btn-primary" type="submit" [disabled]="loading">
+        {{ loading ? 'Entrando...' : 'Entrar' }}
+      </button>
+    </form>
+  } @else {
+    <div class="tabs">
+      <button type="button" [class.active]="tab === 'reports'" (click)="tab = 'reports'">
+        Reports <span>{{ reports.length }}</span>
+      </button>
+      <button type="button" [class.active]="tab === 'suggestions'" (click)="tab = 'suggestions'">
+        Sugestões <span>{{ suggestions.length }}</span>
+      </button>
+      <button type="button" class="refresh" (click)="loadAll()">Atualizar</button>
+    </div>
+
+    @if (tab === 'reports') {
+      <section class="list">
+        @for (report of reports; track report.id) {
+          <article class="item">
+            <div class="item-top">
+              <strong>{{ report.motivo }}</strong>
+              <select [ngModel]="report.status" (ngModelChange)="updateReport(report, $event)">
+                @for (status of statusOptions; track status) {
+                  <option [value]="status">{{ status }}</option>
+                }
+              </select>
+            </div>
+            <p class="meta">{{ report.modo }} · {{ report.createdAt | date:'short' }}</p>
+            @if (report.perguntaId) { <p class="meta">ID: {{ report.perguntaId }}</p> }
+            @if (report.contexto) { <p>{{ report.contexto }}</p> }
+            @if (report.detalhe) { <p class="detail">{{ report.detalhe }}</p> }
+          </article>
+        } @empty {
+          <p class="empty">Nenhum report recebido ainda.</p>
+        }
+      </section>
+    }
+
+    @if (tab === 'suggestions') {
+      <section class="list">
+        @for (suggestion of suggestions; track suggestion.id) {
+          <article class="item">
+            <div class="item-top">
+              <strong>{{ suggestion.pergunta }}</strong>
+              <select [ngModel]="suggestion.status" (ngModelChange)="updateSuggestion(suggestion, $event)">
+                @for (status of suggestionStatusOptions; track status) {
+                  <option [value]="status">{{ status }}</option>
+                }
+              </select>
+            </div>
+            <p class="meta">
+              {{ suggestion.nome }} · {{ suggestion.createdAt | date:'short' }}
+              @if (suggestion.contato) { · {{ suggestion.contato }} }
+            </p>
+            <div class="answers">
+              @if (suggestion.alternativaA) { <span>A. {{ suggestion.alternativaA }}</span> }
+              @if (suggestion.alternativaB) { <span>B. {{ suggestion.alternativaB }}</span> }
+              @if (suggestion.alternativaC) { <span>C. {{ suggestion.alternativaC }}</span> }
+              @if (suggestion.alternativaD) { <span>D. {{ suggestion.alternativaD }}</span> }
+            </div>
+            <p class="detail">Resposta: {{ suggestion.respostaCorreta }}</p>
+            <p class="meta">{{ suggestion.referencia || 'Sem referência' }} · {{ suggestion.dificuldade }} · {{ suggestion.testamento || 'Testamento indefinido' }}</p>
+            @if (suggestion.observacao) { <p>{{ suggestion.observacao }}</p> }
+          </article>
+        } @empty {
+          <p class="empty">Nenhuma sugestão recebida ainda.</p>
+        }
+      </section>
+    }
+  }
+</div>

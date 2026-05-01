@@ -84,5 +84,20 @@ export interface RelatarProblemaRequest {
   detalhe?: string;
 }
 
+export interface SugerirPerguntaRequest {
+  nome: string;
+  contato?: string;
+  pergunta: string;
+  alternativaA?: string;
+  alternativaB?: string;
+  alternativaC?: string;
+  alternativaD?: string;
+  respostaCorreta: string;
+  referencia?: string;
+  dificuldade: Dificuldade;
+  testamento: Testamento;
+  observacao?: string;
+}
+
 export type Dificuldade = 'facil' | 'medio' | 'dificil' | '';
 export type Testamento = 'AT' | 'NT' | '';

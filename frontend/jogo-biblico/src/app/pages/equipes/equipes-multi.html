@@ -1,7 +1,9 @@
 @if (phase() === 'config') {
   <div class="container config">
+    <a routerLink="/equipes" class="config-back">← Voltar ao início</a>
+    <p class="subtitle">Configuração</p>
     <h1>Por Equipes em Rede</h1>
-    <p class="subtitle">Cada equipe joga no proprio dispositivo</p>
+    <div class="config-ornament" aria-hidden="true"><span></span><strong>*</strong><span></span></div>
 
     <div class="mode-tabs">
       <button [class.active]="configMode() === 'criar'" (click)="configMode.set('criar')">Criar Sala</button>
@@ -62,7 +64,6 @@
     }
 
     <div class="actions">
-      <a routerLink="/equipes" class="btn-secondary">Voltar</a>
       @if (configMode() === 'criar') {
         <button class="btn-primary" (click)="criarSala()">Criar Sala</button>
       } @else if (configMode() === 'entrar') {
@@ -197,22 +198,28 @@
         }
       </div>
 
-      @if (ehMinhavez() && perguntaDaVez() && !resultadoResposta()) {
+      @if (perguntaDaVez() && !resultadoResposta()) {
         <div class="timer-group">
           <div class="timer" [class.urgent]="timerSeconds() <= 8">{{ timerSeconds() }}s</div>
-          <button class="btn-more-time" (click)="adicionarTempo()" [disabled]="aguardando()">+10s (-1pt)</button>
+          @if (ehMinhavez()) {
+            <button class="btn-more-time" (click)="adicionarTempo()" [disabled]="aguardando()">+10s (-1pt)</button>
+          }
         </div>
       }
     </div>
 
     @if (perguntaDaVez() && !resultadoResposta()) {
-      @if (ehMinhavez()) {
-        <div class="timer-bar">
-          <div class="timer-fill" [style.width.%]="timerPercent()" [class.urgent]="timerSeconds() <= 8"></div>
-        </div>
-      }
+      <div class="timer-bar">
+        <div class="timer-fill" [style.width.%]="timerPercent()" [class.urgent]="timerSeconds() <= 8"></div>
+      </div>
 
       <div class="question-card">
+        <div class="report-row">
+          <app-report-issue
+            modo="equipes-em-rede"
+            [perguntaId]="perguntaDaVez()!.id"
+            [contexto]="perguntaDaVez()!.pergunta" />
+        </div>
         <div class="difficulty badge-{{ perguntaDaVez()!.dificuldade }}">{{ perguntaDaVez()!.dificuldade }}</div>
         <p class="question-text">{{ perguntaDaVez()!.pergunta }}</p>
         @if (perguntaDaVez()!.referencia) {
@@ -245,6 +252,11 @@
 
     @if (resultadoResposta()) {
       <div class="revealed-question">
+        <div class="report-row">
+          <app-report-issue
+            modo="equipes-em-rede"
+            [contexto]="resultadoResposta()!.perguntaTexto + ' | Resposta correta: ' + resultadoResposta()!.respostaCorreta" />
+        </div>
         <p class="revealed-label">Pergunta revelada</p>
         <h2>{{ resultadoResposta()!.perguntaTexto }}</h2>
         <p>Resposta correta: <strong>{{ resultadoResposta()!.respostaCorreta }}</strong></p>

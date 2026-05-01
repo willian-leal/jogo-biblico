@@ -5,77 +5,148 @@
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  color: white;
+  background:
+    radial-gradient(ellipse 120% 60% at 50% -10%, rgba(232, 213, 196, 0.38) 0%, var(--jw-bg) 55%),
+    var(--jw-bg);
+  color: var(--jw-ink);
 }
 
 .hero {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 3.25rem;
+  animation: jw-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 
-  .hero-icon {
-    font-size: 4rem;
-    margin-bottom: 1rem;
+  .eyebrow {
+    margin: 0 0 0.875rem;
+    color: var(--jw-accent);
+    font-family: var(--jw-title);
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    opacity: 0.78;
   }
 
   h1 {
-    font-size: 3rem;
+    color: var(--jw-ink);
+    font-family: var(--jw-title);
+    font-size: clamp(2.625rem, 8vw, 4.75rem);
     font-weight: 700;
-    margin: 0 0 0.5rem;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    margin: 0;
+    animation: jw-glow 3s ease-in-out infinite;
+  }
+
+  .ornament {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    margin: 1.125rem 0 1rem;
+
+    span {
+      flex: 1;
+      height: 1px;
+      min-width: 72px;
+      background: linear-gradient(to right, transparent, rgba(192, 80, 30, 0.4));
+
+      &:last-child {
+        background: linear-gradient(to left, transparent, rgba(192, 80, 30, 0.4));
+      }
+    }
+
+    i {
+      color: var(--jw-accent);
+      font-size: 0.875rem;
+      font-style: normal;
+      opacity: 0.7;
+    }
   }
 
   p {
-    font-size: 1.2rem;
-    opacity: 0.8;
+    color: var(--jw-muted);
+    font-family: var(--jw-body);
+    font-size: 1rem;
+    font-style: italic;
     margin: 0;
   }
 }
 
 .modes {
-  display: flex;
-  gap: 2rem;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.875rem;
+  width: 100%;
+  max-width: 980px;
+  animation: jw-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
 }
 
 .mode-card--destaque {
-  border-color: #4ecdc4;
-  background: rgba(78, 205, 196, 0.1);
+  border-color: rgba(232, 98, 42, 0.42) !important;
+  background: var(--jw-card-soft) !important;
 }
 
 .mode-card {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 1rem;
-  padding: 2rem;
-  width: 220px;
+  align-items: flex-start;
+  background: var(--jw-card);
+  border: 1px solid var(--jw-line);
+  border-radius: 10px;
+  padding: 1.75rem 1.25rem 1.5rem;
   text-decoration: none;
-  color: white;
-  transition: transform 0.2s, background 0.2s;
+  color: var(--jw-ink);
+  box-shadow: var(--jw-shadow);
+  transition: transform 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s;
   cursor: pointer;
 
   &:hover {
     transform: translateY(-6px);
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--jw-card-soft);
+    border-color: rgba(232, 98, 42, 0.55);
+    box-shadow: var(--jw-shadow-hover);
   }
 
   .mode-icon {
-    font-size: 3rem;
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    background: var(--jw-accent-faint);
+    border: 1px solid rgba(192, 80, 30, 0.28);
+    border-radius: 8px;
+    color: var(--jw-accent);
+    font-family: var(--jw-title);
+    font-size: 1.35rem;
     margin-bottom: 1rem;
   }
 
   h2 {
-    font-size: 1.5rem;
+    color: var(--jw-accent);
+    font-family: var(--jw-title);
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
     margin: 0 0 0.5rem;
   }
 
   p {
-    font-size: 0.9rem;
-    opacity: 0.75;
-    text-align: center;
+    color: var(--jw-muted);
+    font-family: var(--jw-body);
+    font-size: 0.82rem;
+    line-height: 1.55;
+    text-align: left;
     margin: 0;
   }
+}
+
+.verse {
+  margin: 3.25rem 0 0;
+  color: var(--jw-accent-deep);
+  font-family: var(--jw-title);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.5;
 }

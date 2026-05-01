@@ -321,6 +321,20 @@ h1 {
   &.wrong { background: rgba(231, 76, 60, 0.28); border-color: rgba(231, 76, 60, 0.6); }
 }
 
+.readonly-alphabet {
+  .letter {
+    cursor: default;
+
+    &:disabled {
+      opacity: 0.78;
+    }
+
+    &.used {
+      opacity: 0.45;
+    }
+  }
+}
+
 .used-list {
   margin: 1rem 0 0;
   text-align: center;
